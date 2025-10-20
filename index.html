@@ -5,103 +5,171 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CV – XIA Huiying</title>
   <style>
+    /* --- 全局样式 --- */
     body {
-      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-family: "Georgia", "Times New Roman", serif;
       margin: 0;
       padding: 0;
-      background: #f7f7f7;
+      background: #f8f5f0;
       color: #333;
-      line-height: 1.6;
+      line-height: 1.7;
     }
+
+    /* --- 页眉 --- */
+    header {
+      background: linear-gradient(135deg, #d3c1a6 0%, #e7dbc6 100%);
+      text-align: center;
+      padding: 80px 20px 60px;
+      color: #2c2c2c;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 2.4em;
+      margin: 0.5em 0 0;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      margin: 10px 0 0;
+      font-size: 1.1em;
+    }
+
+    header a {
+      color: #2c2c2c;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    /* --- 头像样式 --- */
+    .photo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+    }
+
+    /* --- 主体 --- */
     .container {
       max-width: 900px;
       background: #fff;
-      margin: 40px auto;
-      padding: 40px;
+      margin: -40px auto 60px;
+      padding: 50px 60px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     }
-    h1, h2 {
-      color: #1a237e;
-    }
-    h1 {
-      text-align: center;
-      font-size: 2em;
-      margin-bottom: 0.2em;
-    }
+
     h2 {
-      border-bottom: 2px solid #eee;
+      color: #6b4f29;
+      border-bottom: 2px solid #e2d6c5;
       padding-bottom: 4px;
-      margin-top: 1.5em;
+      margin-top: 40px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .contact {
-      text-align: center;
-      font-size: 1em;
-      color: #555;
-      margin-bottom: 1em;
+
+    p, li {
+      font-size: 1.05em;
     }
+
     ul {
-      list-style-type: "• ";
+      margin-top: 8px;
       margin-left: 20px;
+      list-style-type: "• ";
     }
-    .section {
-      margin-top: 1.5em;
+
+    footer {
+      text-align: center;
+      padding: 25px 10px;
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    /* --- 小屏适配 --- */
+    @media (max-width: 700px) {
+      .container {
+        padding: 30px 20px;
+      }
+      header h1 {
+        font-size: 1.8em;
+      }
+      .photo {
+        width: 110px;
+        height: 110px;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1>XIA Huiying</h1>
-    <p class="contact">Chine | 📧 <a href="mailto:xiahuiyinfr@163.com">xiahuiyinfr@163.com</a></p>
 
-    <h2>FORMATION</h2>
+<body>
+  <header>
+    <!-- 上传头像后修改下面的路径 -->
+    <img src="portrait.jpg" alt="Photo de XIA Huiying" class="photo">
+    <h1>XIA Huiying</h1>
+    <p>Chine | 📧 <a href="mailto:xiahuiyinfr@163.com">xiahuiyinfr@163.com</a></p>
+  </header>
+
+  <div class="container">
+
+    <h2>Formation</h2>
     <p><b>09/2020 – 06/2024</b> — Université de Technologie de Taiyuan<br>
     <b>Spécialité :</b> Technologie de préservation des vestiges culturels<br>
     ♦ Obtention du diplôme de Licence en juin 2024</p>
 
-    <h2>EXPÉRIENCES DE RECHERCHE</h2>
+    <h2>Expériences de recherche</h2>
     <p><b>2023 – 2024</b> — Programme provincial de formation à l’innovation et à l’entrepreneuriat<br>
     <i>Projet :</i> Recherche sur la technologie traditionnelle de la peinture polychrome des bâtiments anciens et ses techniques de préservation.</p>
     <ul>
       <li>Étude menée sur les peintures polychromes du Temple Wubian</li>
-      <li>Réalisation du prélèvement d’échantillons et de quatre analyses expérimentales (XRD, LRM, SEM-EDX, analyse de la structure en coupe de l'échantillon)</li>
+      <li>Réalisation du prélèvement d’échantillons et de quatre analyses expérimentales (XRD, LRM, SEM-EDX, analyse de la structure en coupe)</li>
       <li>Traitement et interprétation des données à l’aide d’outils numériques</li>
     </ul>
 
-    <h2>HONNEURS ET RÉCOMPENSES</h2>
+    <h2>Honneurs et récompenses</h2>
     <ul>
-      <li><b>03/2023 – 09/2023</b> — Troisième prix – Concours « Coupe de la Challenge » d’œuvres scientifiques et technologiques des étudiants, Université de Technologie de Taiyuan</li>
+      <li><b>03/2023 – 09/2023</b> — Troisième prix – Concours « Coupe de la Challenge » d’œuvres scientifiques et technologiques, Université de Technologie de Taiyuan</li>
       <li>Prix d'argent – Concours « Internet+ » d’innovation et d’entrepreneuriat étudiant, Université de Technologie de Taiyuan</li>
       <li><i>Projet :</i> Plateforme de visualisation numérique des musées commémoratifs révolutionnaires du Shanxi</li>
       <li><b>07/2025</b> — Certificat de formation – École d’été « Préservation numérique du patrimoine culturel et calcul intelligent », Université Wuhan</li>
     </ul>
 
-    <h2>ACTIVITÉS SCOLAIRES</h2>
+    <h2>Activités scolaires</h2>
     <ul>
       <li><b>07/2021 – 01/2024</b> — Enquêtes sur les monuments culturels et musées (Shanghai, Hangzhou, Shanxi, Henan, etc.)<br>
       • Compréhension approfondie de la valeur historique du patrimoine et des principes de conservation<br>
-      • Observation des méthodes d’exposition et des projets de conservation actuels en Chine</li>
+      • Observation des méthodes d’exposition et des projets de conservation actuels</li>
 
       <li><b>03/2023 – 06/2023</b> — Pratique de la restauration du patrimoine : Montage et restauration de peintures et de calligraphies<br>
       • Réalisation individuelle de l'encadrement<br>
       • Restauration en groupe de peintures et dessins chinois</li>
     </ul>
 
-    <h2>EXPÉRIENCES PROFESSIONNELLES</h2>
+    <h2>Expériences professionnelles</h2>
     <ul>
       <li><b>08/2024 – 09/2024</b> — Stagiaire, Département de la propagande et de la planification, Musée des ruines de Pan Long Cheng</li>
       <li><b>01/2022 – 02/2022</b> — Stagiaire en montage et production, Studio du réalisateur JIN Huaqing</li>
     </ul>
 
-    <h2>COMPÉTENCES LINGUISTIQUES</h2>
+    <h2>Compétences linguistiques</h2>
     <ul>
       <li>Chinois : Langue maternelle</li>
       <li>Anglais : Niveau B2</li>
       <li>Français : Niveau B2</li>
     </ul>
 
-    <h2>CENTRES D’INTÉRÊT</h2>
+    <h2>Centres d’intérêt</h2>
     <p>Photographie, Cinéma, Peinture, Spéléologie, Randonnée</p>
   </div>
+
+  <footer>
+    © 2025 XIA Huiying — Tous droits réservés
+  </footer>
 </body>
 </html>
