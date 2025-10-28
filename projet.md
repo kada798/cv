@@ -31,9 +31,8 @@ Il doit décider : conserver, nettoyer ou supprimer ces données modifiées ?
 - **Images et sons libres de droits** — ambiance et narration sonore  
 - *(optionnel)* **GitHub Pages** — hébergement du prototype jouable  
 
-
 ## Ressources
-Images : [Wikimedia Commons](https://commons.wikimedia.org/), [Louvre Collections](https://collections.louvre.fr/)
+Images : [Wikimedia Commons](https://commons.wikimedia.org/), [Louvre Collections](https://collections.louvre.fr/)...
 
 ---
 # Les détails de l'histoire
@@ -90,24 +89,6 @@ Chaque choix ouvre une fin différente et propose une réflexion sur la mémoire
   - 💾 **Nettoyer les données** → suppression de l’IA, retour aux archives originales.  
   - 🔚 **Fermer le système** → effacement complet, l’humanité retrouve l’oubli.
 ---
-
-## 🧩 4. Structure du projet
-/assets/ → Images, sons, polices et données JSON
-/js/
-main.js → Configuration principale du jeu
-scenes/
-intro.js → Scène d’introduction
-archiveRoom.js → Salle principale : exploration et puzzle
-glitchScene.js → Scène d’anomalie (effets visuels et audio)
-ending.js → Différentes fins selon les choix du joueur
-/data/
-dialogues.json → Textes narratifs et choix interactifs
-puzzles.json → Énigmes et données à corriger
-index.html → Page d’accueil et lancement du jeu
-
-
----
-
 
 
 
