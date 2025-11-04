@@ -87,7 +87,7 @@ Chaque choix ouvre une fin différente et propose une réflexion sur la mémoire
   -  **Conserver le système** → mémoire parfaite, vérité perdue.  
   -  **Nettoyer les données** → suppression de l’IA, retour aux archives originales.  
   -  **Fermer le système** → effacement complet, l’humanité retrouve l’oubli.
----
+
 ## 4. Structure du projet
 
 L’architecture du projet est conçue pour être claire, modulaire et évolutive, ce qui facilite le développement et la maintenance du jeu.
