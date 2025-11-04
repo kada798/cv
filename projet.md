@@ -119,6 +119,5 @@ Page d’entrée du projet.
 Elle charge le moteur Phaser 3, les scripts nécessaires et les ressources initiales.
 C’est à partir de ce fichier que le jeu est exécuté dans le navigateur.
 
-(optionnel) GitHub Pages
 ---
 
