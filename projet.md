@@ -33,7 +33,7 @@ Il doit décider : conserver, nettoyer ou supprimer ces données modifiées ?
 Images : [Musée du Palais](https://www.dpm.org.cn/explore/collections.html),[Musée du Dunhuang](https://www.dhbwg.org.cn/)
 [Musée du Henan](https://www.chnmus.net/ch/index.html),[Musée du Kaifeng](https://www.kfsbwg.com/#/home)
 
-(Le projet portant sur le patrimoine numérique se concentrera sur une période historique précise afin d'être plus réalisable. Compte tenu de mon contexte culturel, il serait plutôt pertinent de choisir une histore chinoise datant de la dynastie Song/Tang/Ming/Qing. Ex: La Fête de Qingming au bord de la rivière, Temple Wubian...)
+(Le projet portant sur le patrimoine numérique se concentrera sur une période historique précise afin d'être plus réalisable. Compte tenu de mon contexte culturel, il serait plutôt pertinent de choisir une histore chinoise datant de la dynastie Song/Tang/Ming/Qing. Ex: La peinture “Le long de la rivière pendant la fête de Qingming”, Temple Wubian...)
 
 ---
 # Les détails de l'histoire
