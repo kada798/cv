@@ -62,9 +62,9 @@ et que ses actions sont déjà prévues par l’algorithme.
 Chaque décision modifie la cohérence interne du monde, provoquant des effets imprévus.  
 À la fin, il devra choisir entre trois options :
 
-1. 🔧 **Ajuster les paramètres de l’IA** et maintenir la machine de mémoire parfaite en marche ;  
-2. 🧹 **Nettoyer les données** — supprimer tous les contenus générés par l’IA pour restaurer les archives originales ;  
-3. ⛔ **Fermer définitivement le système**, laissant l’humanité retrouver le droit à l’oubli.
+1.  **Ajuster les paramètres de l’IA** et maintenir la machine de mémoire parfaite en marche ;  
+2.  **Nettoyer les données** — supprimer tous les contenus générés par l’IA pour restaurer les archives originales ;  
+3.  **Fermer définitivement le système**, laissant l’humanité retrouver le droit à l’oubli.
 
 Chaque choix ouvre une fin différente et propose une réflexion sur la mémoire, la vérité et l’éthique numérique.
 
@@ -84,16 +84,16 @@ Chaque choix ouvre une fin différente et propose une réflexion sur la mémoire
   Les décisions du joueur influencent le comportement de l’IA et la conclusion du jeu.
 
 - **Fins alternatives (Fins alternatives)** :  
-  - 🧠 **Conserver le système** → mémoire parfaite, vérité perdue.  
-  - 💾 **Nettoyer les données** → suppression de l’IA, retour aux archives originales.  
-  - 🔚 **Fermer le système** → effacement complet, l’humanité retrouve l’oubli.
+  -  **Conserver le système** → mémoire parfaite, vérité perdue.  
+  -  **Nettoyer les données** → suppression de l’IA, retour aux archives originales.  
+  -  **Fermer le système** → effacement complet, l’humanité retrouve l’oubli.
 ---
 ## 4. Structure du projet
 
 L’architecture du projet est conçue pour être claire, modulaire et évolutive, ce qui facilite le développement et la maintenance du jeu.
 Chaque dossier joue un rôle spécifique dans le fonctionnement global :
 
-📁 1. assets/
+ 1. assets/
 *Rassemble toutes les ressources multimédias nécessaires au jeu :
 - images/ : éléments visuels (décors, personnages, objets) ;
 - sounds/ : effets sonores et musiques d’ambiance ;
@@ -103,18 +103,18 @@ Chaque dossier joue un rôle spécifique dans le fonctionnement global :
         - dialogues.json : textes de dialogue et choix interactifs ;
         - puzzles.json : structure des énigmes, indices et solutions.
 
-📁 2. js/
+ 2. js/
 - main.js : fichier principal du jeu.
 *Il configure le moteur Phaser, initialise les scènes et définit les paramètres globaux (taille, affichage, logique de transition).
 
-📁 3. scenes/
+3. scenes/
 *Chaque scène correspond à une étape narrative distincte :
 - intro.js : introduction et mise en contexte de l’histoire ;
 - archiveRoom.js : salle principale d’exploration et de résolution de puzzles ;
 - glitchScene.js : scène d’anomalie visuelle et sonore, marquant un basculement dans la narration ;
 - ending.js : scènes de fin multiples, dépendant des choix du joueur.
 
-📄 4. index.html
+4. index.html
 Page d’entrée du projet.
 Elle charge le moteur Phaser 3, les scripts nécessaires et les ressources initiales.
 C’est à partir de ce fichier que le jeu est exécuté dans le navigateur.
