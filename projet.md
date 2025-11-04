@@ -7,7 +7,7 @@
 `Phaser` · `Jeu narratif` · `IA et patrimoine` · `Décryptage` · `Data storytelling` · `Humanités numériques`
 
 ## Objectif
-Créer un mini-jeu narratif et d’énigmesen  en **Phaser 3**, inspiré de Shadow Factory et de l’idée d’une intervention de l’intelligence artificielle dans le traitement et l’interprétation des données du patrimoine culturel. Sur le plan du but pédagogique, il s'agit d'apprendre les bases du développement interactif et expérimenter la narration autour du **patrimoine numérique et l’IA**.
+Créer un mini-jeu narratif et d’énigmesen  en **Phaser 3**, inspiré du jeu d'Imposter Factory, Detroit: Become Human et de l’idée d’une intervention de l’intelligence artificielle dans le traitement et l’interprétation des données du patrimoine culturel. Sur le plan du but pédagogique, il s'agit d'apprendre les bases du développement interactif et expérimenter la narration autour du **patrimoine numérique et l’IA**.
 Il explore la frontière entre : **mémoire et oubli**, **réalité et reconstitution**, **patrimoine culturel et intelligence artificielle**.  Le joueur devient ainsi le témoin d’une réflexion sur la manière dont les technologies numériques transforment notre rapport à la vérité historique et à la mémoire collective.
 
 ## Concept
