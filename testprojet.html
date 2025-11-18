@@ -85,6 +85,10 @@
         new Phaser.Geom.Rectangle(-img.displayWidth/2, -img.displayHeight/2, img.displayWidth, img.displayHeight+40),
         Phaser.Geom.Rectangle.Contains
       );
+      
+      // Background rectangle inside container
+      const rect = this.add.rectangle(0, 0, 320, 200, 0x325b6e).setOrigin(0.5);
+      container.add(rect);
 
       container.setSize(320,200);
       container.setInteractive(new Phaser.Geom.Rectangle(-160,-100,320,200), Phaser.Geom.Rectangle.Contains);
