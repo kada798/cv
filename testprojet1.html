@@ -30,7 +30,7 @@
     ],
     qingming: {
       id:'qingming',
-      title:"« Le long de la rivière pendant la fête de Qingming » (fragment)",
+      title:"« Le long de la rivière pendant la fête de Qingming » ",
       text:"Scan haute définition. Des segments ont été réécrits automatiquement par l'IA. Des incohérences picturales sont détectées."
     }
   };
@@ -86,6 +86,10 @@
         Phaser.Geom.Rectangle.Contains
       );
 
+      // Background rectangle inside container
+      const rect = this.add.rectangle(0, 0, 100, 10, 0xFFFFFF).setOrigin(0.5);
+      container.add(rect);
+
       container.setSize(320,200);
       container.setInteractive(new Phaser.Geom.Rectangle(-160,-100,320,200), Phaser.Geom.Rectangle.Contains);
       container.on('pointerup',()=> this.openArchive(item));
@@ -95,7 +99,7 @@
       container.on('pointerout',()=> img.clearTint());
 
 
-      this.add.text(20,h-60,'Décryptage : Puzzle 3×3 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
+      this.add.text(20,h-60,'Décryptage : Puzzle 15×1 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
 
       this.choiceText = this.add.text(w-320,20,'Choix : —',{fontSize:'14px'});
     }
