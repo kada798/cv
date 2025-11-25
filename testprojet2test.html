@@ -18,8 +18,7 @@
   <script>
   /* Version simplifiée :
      - Un seul objet : « Le long de la rivière pendant la fête de Qingming »
-     - Un puzzle de 15×1 pour restaurer le rouleau
-     - Une scène de métadonnées erronées à corriger
+     - Un puzzle 3×3
      - Un choix moral final
   */
 
@@ -103,15 +102,6 @@
       this.add.text(20,h-60,'Décryptage : Puzzle 15×1 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
 
       this.choiceText = this.add.text(w-320,20,'Choix : —',{fontSize:'14px'});
-      this.add.text(20, 20, "MetadataScene", {
-    fontSize: "24px",
-    color: "#0077ff"
-})
-.setInteractive()
-.on('pointerdown', () => {
-    this.scene.start("MetadataScene");
-});
-
     }
 
     openArchive(item){
@@ -137,151 +127,146 @@
     }
   }
 
-  class Puzzle extends Phaser.Scene {
-    constructor() { super('Puzzle'); }
+class Puzzle extends Phaser.Scene {
+  constructor() { super('Puzzle'); }
 
-    create() {
-      const w = this.scale.width;
-      const h = this.scale.height;
+  create() {
+    const w = this.scale.width;
+    const h = this.scale.height;
 
-      this.cameras.main.setBackgroundColor('#06121b');
-      this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px' });
+    this.cameras.main.setBackgroundColor('#06121b');
+    this.add.text(20, 20, 'Puzzle Qingming (15×1)', { fontSize: '18px' });
 
-      const grid = 15;
-      const spacing = 4;
-      const displayW = 80;
-      const displayH = 120;
+    const grid = 15;
+    const spacing = 4;
 
-      const src = this.textures.get('qingming_main').getSourceImage();
-      this.imgW = src.width;
-      this.imgH = src.height;
-      this.sliceW = Math.floor(this.imgW / grid);
+    // 原图尺寸
+    const src = this.textures.get('qingming_main').getSourceImage();
+    this.imgW = src.width;   // 1920
+    this.imgH = src.height;  // 335
+    this.sliceW = Math.floor(this.imgW / grid); // 128
 
-      this.solution = [];
-      for (let i = 1; i <= grid; i++) this.solution.push(i);
-      this.state = Phaser.Utils.Array.Shuffle(this.solution.slice());
+    // 正确解答
+    this.solution = [];
+    for (let i = 1; i <= grid; i++) this.solution.push(i);
 
-      const totalW = grid * displayW + (grid - 1) * spacing;
-      const startX = w / 2 - totalW / 2 + displayW / 2;
-      const y = h / 2;
+    // 打乱初始状态
+    this.state = Phaser.Utils.Array.Shuffle(this.solution.slice());
 
-      this.slices = [];
-      this.selected = null;
+    const totalW = grid * this.sliceW + (grid - 1) * spacing;
+    const startX = this.sliceW / 2;
+    const y = h / 2;
 
-      for (let i = 0; i < grid; i++) {
-        const curVal = this.state[i];
-        const x = startX + i * (displayW + spacing);
+    this.slices = [];
+    this.selected = null;
 
-        const img = this.add.image(x, y, 'qingming_main')
-          .setOrigin(0.5)
-        // 自动按高度缩小，让切片保持原比例
-        const scale = displayH / this.imgH;
-        img.setScale(scale);
+    for (let i = 0; i < grid; i++) {
+      const curVal = this.state[i];
+      const x = startX + i * (this.sliceW + spacing);
 
-        img.currentValue = curVal;
+      // 添加图片切片
+      const img = this.add.image(x, y, 'qingming_main')
+        .setOrigin(0.5);
 
-        img.setCrop(
-          (curVal - 1) * this.sliceW,
-          0,
-          this.sliceW,
-          this.imgH
-        );
+      img.currentValue = curVal;
+      img.index = i; // 当前所在位置索引
 
-        // const border = this.add.rectangle( x, y, displayW, displayH） 
-
-        const scaledW = this.sliceW * scale;
-        const scaledH = this.imgH * scale;
-        const border = this.add.rectangle(
-          x, y, scaledW, scaledH
-        ).setStrokeStyle(0, 0xffffff)
-         .setOrigin(0.5);
-               
-
-
-        img.border = border;
-        
-
-        img.setInteractive();
-        img.on('pointerup', () => this.onSliceClicked(img));
-
-        this.slices.push(img);
-      }
-
-      this.status = this.add.text(
-        w / 2,
-        y + displayH + 50,
-        'Réorganisez le long rouleau...',
-        { fontSize: '16px' }
-      ).setOrigin(0.5);
-
-      this.add.text(w - 120, 20, 'FERMER', {
-        fontSize: '14px',
-        backgroundColor: '#222',
-        padding: 6
-      })
-        .setInteractive()
-        .on('pointerup', () => this.scene.stop());
-
-      // 摄像机边界，保证能拖动查看完整拼图
-      this.cameras.main.setBounds(0, 0, totalW, this.imgH);
-      this.input.on('pointermove', (pointer) => {
-        if (pointer.isDown) {
-          this.cameras.main.scrollX -= (pointer.x - pointer.prevPosition.x);
-        }
-      });
-    }
-  
-    onSliceClicked(img) {
-      if (!this.selected) {
-        this.selected = img;
-        img.border.setStrokeStyle(3, 0xffe082);
-        return;
-      }
-
-      if (img === this.selected) {
-        img.border.setStrokeStyle(0);
-        this.selected = null;
-        return;
-      }
-
-      const a = this.selected;
-      const b = img;
-
-      const tmp = a.currentValue;
-      a.currentValue = b.currentValue;
-      b.currentValue = tmp;
-
-      a.setCrop(
-        (a.currentValue - 1) * this.sliceW,
+      // 裁剪对应的切片
+      img.setCrop(
+        (curVal - 1) * this.sliceW,
         0,
         this.sliceW,
         this.imgH
       );
 
-      b.setCrop(
-        (b.currentValue - 1) * this.sliceW,
-        0,
-        this.sliceW,
-        this.imgH
-      );
+      // 边框
+      const border = this.add.rectangle(
+        x, y, this.sliceW, this.imgH
+      ).setStrokeStyle(0, 0xffffff)
+       .setOrigin(0.5);
 
-      a.border.setStrokeStyle(0);
-      this.selected = null;
+      img.border = border;
 
-      if (this.isSolved()) {
-        this.status.setText('Puzzle résolu ! Le rouleau est restauré.');
-        gameState.choices.push({ id: 'puzzle_qingming', action: 'resolu' });
-      }
+      img.setInteractive();
+      img.on('pointerup', () => this.onSliceClicked(img));
+
+      this.slices.push(img);
     }
 
-    isSolved() {
-      for (let i = 0; i < this.solution.length; i++) {
-        if (this.slices[i].currentValue !== this.solution[i]) return false;
+    this.status = this.add.text(
+      w / 2,
+      y + this.imgH / 2 + 70,
+      'Réorganisez le long rouleau...',
+      { fontSize: '16px' }
+    ).setOrigin(0.5);
+
+    this.add.text(w - 120, 20, 'FERMER', {
+      fontSize: '14px',
+      backgroundColor: '#222',
+      padding: 6
+    })
+      .setInteractive()
+      .on('pointerup', () => this.scene.stop());
+
+    // 摄像机边界，保证能拖动查看完整拼图
+    this.cameras.main.setBounds(0, 0, totalW, this.imgH);
+    this.input.on('pointermove', (pointer) => {
+      if (pointer.isDown) {
+        this.cameras.main.scrollX -= (pointer.x - pointer.prevPosition.x);
       }
-      return true;
+    });
+  }
+
+  onSliceClicked(img) {
+    if (!this.selected) {
+      this.selected = img;
+      img.border.setStrokeStyle(3, 0xffe082);
+      return;
+    }
+
+    if (img === this.selected) {
+      img.border.setStrokeStyle(0);
+      this.selected = null;
+      return;
+    }
+
+    const a = this.selected;
+    const b = img;
+
+    // 交换位置
+    const ax = a.x, ay = a.y;
+    a.x = b.x; a.y = b.y;
+    b.x = ax; b.y = ay;
+
+    // 同步边框位置
+    a.border.x = a.x; a.border.y = a.y;
+    b.border.x = b.x; b.border.y = b.y;
+
+    // 交换索引
+    const tmpIndex = a.index;
+    a.index = b.index;
+    b.index = tmpIndex;
+
+    a.border.setStrokeStyle(0);
+    this.selected = null;
+
+    // 检查是否完成
+    if (this.isSolved()) {
+      this.status.setText('Puzzle résolu ! Le rouleau est restauré.');
+      gameState.choices.push({ id: 'puzzle_qingming', action: 'resolu' });
     }
   }
-  
+
+  isSolved() {
+    // 检查每个位置上的切片是否正确
+    for (let i = 0; i < this.solution.length; i++) {
+      const slice = this.slices.find(s => s.index === i);
+      if (!slice || slice.currentValue !== this.solution[i]) return false;
+    }
+    return true;
+  }
+}
+
   class ScrollableQingming extends Phaser.Scene {
     constructor() { super('ScrollableQingming'); }
 
@@ -337,97 +322,6 @@
     }
   }
 
-  class MetadataScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'MetadataScene' });
-    }
-
-    create() {
-        // 背景
-        this.cameras.main.setBackgroundColor('#ffffff');
-
-
-        // 错误元数据示例文本（法语呈现给用户）
-        const lines = [
-                { 
-        text: "1. Ce rouleau a été peint en l’an 800, durant la dynastie Song du Nord.", 
-        wrong: true  // 实创作于12世纪
-    },
-    { 
-        text: "2. L’œuvre utilise une technique de coloration typique de la dynastie Ming.", 
-        wrong: true  // 明代设色技法不是张择端版本
-    },
-    { 
-        text: "3. « Le long de la rivière pendant la fête de Qingming » représente la capitale Bianjing (aujourd’hui Kaifeng) en pleine effervescence durant la fête de Qingming.", 
-        wrong: false // 这是正确描述
-    },
-    { 
-        text: "4. Ce rouleau fait partie des dix peintures les plus célèbres de l’histoire chinoise.", 
-        wrong: false  // 说法流行但不属于官方“十大”
-    },
-    { 
-        text: "5. Le début du rouleau montre les faubourgs, la partie centrale se concentre sur le pont en arc, et la fin décrit les rues animées de la ville.", 
-        wrong: false  //  正确描述
-    },
-    { 
-        text: "6. Le rouleau montre plus de cinq types de moyens de transport.", 
-        wrong: false  // 正确描述
-    },
-    { 
-        text: "7. Le rouleau représente moins de dix catégories sociales parmi les personnages.", 
-        wrong: true  // 实际人物身份种类非常多
-    }
-];
-
-
-        this.selected = 0;
-        this.totalWrong = lines.filter(l => l.wrong).length;
-
-        const startY = 120;
-        const gap = 50;
-
-        lines.forEach((line, i) => {
-            let textObj = this.add.text(60, startY + i * gap, line.text, {
-                fontSize: '20px',
-                color: '#000'
-            }).setInteractive();
-
-            // 点击事件
-            textObj.on('pointerdown', () => {
-                if (line.wrong) {
-                    textObj.setColor('#d60000'); // 红色表示选对了（错误句子）
-                } else {
-                    textObj.setColor('#00a000'); // 绿色表示误选
-                }
-
-                textObj.disableInteractive();
-                this.selected++;
-
-                if (this.selected === this.totalWrong) {
-                    this.showResult();
-                }
-            });
-        });
-
-        // 返回按钮
-        this.add.text(20, 20, "← Retour", {
-            fontSize: '24px',
-            color: '#0077ff'
-        })
-        .setInteractive()
-        .on('pointerdown', () => {
-            this.scene.start("Puzzle");
-        });
-    }
-
-    showResult() {
-        this.add.text(60, 380, "Terminé ! Vous avez identifié toutes les métadonnées erronées.", {
-            fontSize: '22px',
-            color: '#222'
-        });
-    }
-}
-
   class Ending extends Phaser.Scene{
     constructor(){ super('Ending'); }
     create(){
@@ -453,9 +347,8 @@
     }
   }
 
-  const config={ type:Phaser.AUTO, parent:'game-container', width:1100, height:760, scene:[Boot,Intro,ArchiveRoom,Puzzle,MetadataScene,Ending] };
+  const config={ type:Phaser.AUTO, parent:'game-container', width:1100, height:760, scene:[Boot,Intro,ArchiveRoom,Puzzle,Ending] };
   new Phaser.Game(config);
-  
   </script>
 </body>
 </html>
