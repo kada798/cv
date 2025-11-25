@@ -120,6 +120,9 @@ Chaque dossier joue un rôle spécifique dans le fonctionnement global :
 Page d’entrée du projet.
 Elle charge le moteur Phaser 3, les scripts nécessaires et les ressources initiales.
 C’est à partir de ce fichier que le jeu est exécuté dans le navigateur.
+## 5. AIGC
+
+https://chatgpt.com/share/69254c3b-9988-8008-b694-53fee46f7d50
 
 ---
 
