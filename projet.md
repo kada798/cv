@@ -160,8 +160,28 @@ solution：1.压缩图片到10MB，仍然黑条状无法显示，转而调整分
 
 
 
+2025.12.02
+在  class Puzzle extends Phaser.Scene部分
+源代码：displayW 控制空间分为，46px 是实际内容。两者一起确保了拼图整齐排列且留有视觉呼吸空间。但display为80，displayW = 80px（逻辑位置间隔）实际图像宽度 ≈ 46px
+差额 = 80 - 46 = 34px 的浪费空间（每个切片两侧）
 
+      const grid = 15;
+      const spacing = 4;
+      const displayW = 80;
+      const displayH = 120;
 
+      const src = this.textures.get('qingming_main').getSourceImage();
+      this.imgW = src.width;
+      this.imgH = src.height;
+      this.sliceW = Math.floor(this.imgW / grid);
+
+订正：
+const grid = 15;
+const spacing = 4;
+const displayH = 120;
+const scale = displayH / this.imgH;  // 0.358
+const scaledSliceW = Math.floor(this.sliceW * scale);  // 自动 = 46px
+const displayW = scaledSliceW + spacing;  // 50px（图像 + 空隙）
 
 
 

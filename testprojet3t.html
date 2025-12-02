@@ -149,11 +149,8 @@
 
       const grid = 15;
       const spacing = 4;
-      const displayH = 120;        
-
-const scale = displayH / this.imgH;  // 0.358
-const scaledSliceW = Math.floor(this.sliceW * scale);  // 自动 = 46px
-const displayW = scaledSliceW + spacing;  // 50px（图像 + 空隙）
+      const displayW = 80;
+      const displayH = 120;
 
       const src = this.textures.get('qingming_main').getSourceImage();
       this.imgW = src.width;
