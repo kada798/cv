@@ -120,9 +120,51 @@ Chaque dossier joue un rôle spécifique dans le fonctionnement global :
 Page d’entrée du projet.
 Elle charge le moteur Phaser 3, les scripts nécessaires et les ressources initiales.
 C’est à partir de ce fichier que le jeu est exécuté dans le navigateur.
-## 5. AIGC
 
+
+## 5. AIGC
 https://chatgpt.com/share/69254c3b-9988-8008-b694-53fee46f7d50
 
----
 
+项目实现阶段：
+第一阶段：
+
+将完整projet输入chatgpt，得到初始代码。
+我删去projet中两个备选的故事背景，集中在《清明上河图上》。
+同时进行语言替换和图片资源替换。
+由于网站上的图片不能正常下载使用，我另外找到图片资源。
+同时将第一个3*3拼图小游戏，按照我的图片尺寸修改成15*1的拼图小游戏。
+
+2025.11.1
+BUG1: 图片无法加载,图片完全黑色条状显示，无法正常打开;Failed to load resource ... CORS policy
+RAISON : 浏览器不能直接从 file:// 加载本地文件到 Phaser，这会导致：
+Failed to load resource ... CORS policy
+这是因为 Chrome / Firefox 默认禁止本地跨域读取资源。
+SOLUTION：VSCode + Live Server
+
+BUG2: img.setStrokeStyle is not a function
+SOLUTION： CHATGPT：
+// 创建边框（透明）
+const border = this.add.rectangle(
+    img.x, img.y,
+    displaySliceW, displaySliceH
+).setStrokeStyle(0, 0xffffff).setOrigin(0.5);
+
+img.border = border;
+
+
+![alt text](<屏幕截图 2025-11-16 224403.png>)
+raison：图片过大（29,9 MB），分辨率过高-32699*1500，超过网页可以承受的范围（浏览器（特别是 WebGL）有一个最大纹理尺寸（取决于显卡，常见：4096～16384）；
+solution：1.压缩图片到10MB，仍然黑条状无法显示，转而调整分辨率到21384宽*1000高 png，仍然过高，Chat gpt 提供的解决方法为切片（tiles）。然后变成了细条状。![alt text](<屏幕截图 2025-11-25 050850.png>)
+
+
+
+
+
+
+
+
+
+
+
+---
