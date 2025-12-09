@@ -1,3 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Notes de développement</title>
+</head>
+<body>
+
+  <h2>Optimisations</h2>
+
+  <p>// Optimiser la proportion d’affichage des fragments du puzzle afin qu’elle corresponde mieux à l’image originale et améliore l’effet visuel ; ajouter une fonction de défilement horizontal pour permettre de voir l’ensemble du puzzle.<br>
+  // Optimiser le retour interactif dans la scène des métadonnées, en ajoutant une distinction de couleur entre les choix corrects et incorrects.</p>
+
+  <p>
+    /// Problème : Lorsqu’on clique sur un fragment du puzzle, le fragment sélectionné n’est pas clairement indiqué et l’utilisateur ne sait pas lequel il a choisi. Après avoir ajouté une bordure, seule la première pièce cliquée affiche une bordure ; la seconde pièce échangée n’en affiche pas.<br>
+    /// (Solution possible : ajouter une propriété de bordure pour chaque fragment et mettre à jour l’emplacement de la bordure lors de l’échange des pièces ?)<br>
+    ///
+  </p>
+
+  <h3>2025.11.1</h3>
+
+  <h4>BUG 1 : L’image ne se charge pas</h4>
+  <p>
+    L’image apparaît sous forme de bandes noires et ne peut pas être affichée correctement.<br>
+    <strong>Erreur :</strong> Failed to load resource … CORS policy<br>
+    <strong>Raison :</strong> Le navigateur ne peut pas charger directement des fichiers locaux via <code>file://</code> dans Phaser. Chrome / Firefox bloquent ce type de lecture pour des raisons de sécurité (CORS).<br>
+    <strong>Solution :</strong> Utiliser VSCode + Live Server.
+  </p>
+
+  <h4>BUG 2 : <code>img.setStrokeStyle is not a function</code></h4>
+  <p><strong>Solution (ChatGPT) :</strong></p>
+
+  <pre>
+// Créer une bordure (transparente)
+const border = this.add.rectangle(
+    img.x, img.y,
+    displaySliceW, displaySliceH
+).setStrokeStyle(0, 0xffffff).setOrigin(0.5);
+
+img.border = border;
+  </pre>
+
+  <p><strong>Raison :</strong> L’image est trop grande (29,9 Mo) et sa résolution est trop élevée — 32699×1500 — dépassant les limites gérables par un navigateur.<br>
+  Les navigateurs (surtout WebGL) ont une taille maximale de texture, généralement entre 4096 et 16384 selon la carte graphique.</p>
+
+  <p>
+    <strong>Solutions tentées :</strong><br>
+    1. Compression de l’image à 10 Mo → toujours affichage en bandes noires.<br>
+    2. Réduction de la résolution à 21384×1000 → encore trop élevé.<br>
+    ChatGPT a proposé d’utiliser un découpage en tuiles (tiles). Le résultat apparaît alors sous forme de bandes très fines.
+  </p>
+
+</body>
+</html>
+
+
+
+
+
 
 
 // 优化拼图场景中的切片显示比例，使其更符合原图比例，提升视觉效果；增加横轴拖动查看完整拼图的功能。

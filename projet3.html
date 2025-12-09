@@ -1,3 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Notes de développement – 2025.12.02</title>
+</head>
+<body>
+
+  <h3>2025.12.02</h3>
+
+  <p>
+// Ajustement de l’espacement entre les fragments et de la largeur d’affichage pour optimiser la mise en page.<br>
+/// Nouveau problème : à l’ouverture du puzzle, l’écran reste noir et l’image ne se charge pas ; en quittant puis en rouvrant une deuxième fois, l’image apparaît correctement.<br>
+///
+  </p>
+
+  <h4>Dans la partie <code>class Puzzle extends Phaser.Scene</code></h4>
+
+  <p>
+    <strong>Code d’origine :</strong><br>
+    <code>displayW</code> contrôlait l’espacement. La valeur 46px correspondait à la taille réelle du fragment visuel.  
+    Les deux valeurs (46px et 80px) garantissaient un alignement propre du puzzle tout en laissant un espace visuel.  
+    Cependant, avec <code>displayW = 80</code>, l’écart est trop grand :  
+    largeur réelle ≈ 46px → différence = 80 − 46 = 34px d’espace perdu de chaque côté du fragment.
+  </
+
+
+
+
+
 2025.12.02
 
 // 调整了碎片间距和显示宽度以优化布局
