@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Optimisation du jeu – Métadonnées</title>
+</head>
+<body>
+
+  <h2>Optimisation du module <em>metadata</em>, correction de bugs et ajout d’un compteur de réponses correctes</h2>
+
+  <h3>Code source (avant optimisation)</h3>
+
+  <pre>
+// Événement de clic
+textObj.on('pointerdown', () => {
+    if (line.wrong) {
+        textObj.setColor('#d60000'); // Rouge = bon choix (phrase incorrecte)
+    } else {
+        textObj.setColor('#00a000'); // Vert = mauvais choix
+    }
+
+    textObj.disableInteractive();
+    this.selected++;
+
+    if (this.selected === this.totalWrong) {
+        this.showResult();
+    }
+});
+  </pre>
+
+  <h3>Code optimisé</h3>
+
+  <pre>
+// Événement de clic
+textObj.on('pointerdown', () => {
+    if (line.wrong) {
+        textObj.setColor('#d60000'); // Rouge = bon choix (phrase incorrecte)
+        this.selected++;  // Incrémenter uniquement en cas de bonne sélection
+    } else {
+        textObj.setColor('#00a000'); // Vert = sélection incorrecte
+    }
+
+    textObj.disableInteractive();
+
+    if (this.selected === this.totalWrong) {
+        this.showResult();
+    }
+});
+  </pre>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+优化游戏matadata，修复bug，增加选对计数功能
+
+源代码：        // 点击事件
+        textObj.on('pointerdown', () => {
+            if (line.wrong) {
+                textObj.setColor('#d60000'); // 红色表示选对了（错误句子）
+            } else {
+                textObj.setColor('#00a000'); // 绿色表示误选
+            }
+
+            textObj.disableInteractive();
+            this.selected++;
+
+            if (this.selected === this.totalWrong) {
+                this.showResult();
+            }
+        });
+优化后代码：        // 点击事件
+          textObj.on('pointerdown', () => {
+                if (line.wrong) {
+                    textObj.setColor('#d60000'); // 红色表示选对了（错误句子）
+                    this.selected++;  // 只在选对时计数
+                } else {
+                    textObj.setColor('#00a000'); // 绿色表示误选
+                }
+
+                textObj.disableInteractive();
+              ;
+
+                if (this.selected === this.totalWrong) {
+                    this.showResult();
+                }

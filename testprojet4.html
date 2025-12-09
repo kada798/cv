@@ -399,12 +399,13 @@
             textObj.on('pointerdown', () => {
                 if (line.wrong) {
                     textObj.setColor('#d60000'); // 红色表示选对了（错误句子）
+                    this.selected++;  // 只在选对时计数
                 } else {
                     textObj.setColor('#00a000'); // 绿色表示误选
                 }
 
                 textObj.disableInteractive();
-                this.selected++;
+              ;
 
                 if (this.selected === this.totalWrong) {
                     this.showResult();
