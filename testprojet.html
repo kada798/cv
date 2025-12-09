@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Les Archives Miroirs - Démo (FR, Qingming seulement)</title>
+  <style>
+    html,body { height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; background:#0b0b0e; color:#eee; }
+    #game-container { width:100%; height:100vh; }
+    .choice-btn { background: #222; border:1px solid #666; color:#fff; padding:6px 10px; margin:6px; cursor:pointer; border-radius:4px; }
+    .choice-btn:hover { background:#333; }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+  <script>
+  /* Version simplifiée :
+     - Un seul objet : « Le long de la rivière pendant la fête de Qingming »
+     - Un puzzle 3×3
+     - Un choix moral final
+  */
+
+  const DIALOGUES = {
+    intro: [
+      "Année 2042 — Les archives numériques montrent des anomalies.",
+      "Vous êtes archiviste numérique chargé d'examiner un fragment unique :",
+      "« Le long de la rivière pendant la fête de Qingming » — reconstruction IA instable."
+    ],
+    qingming: {
+      id:'qingming',
+      title:"« Le long de la rivière pendant la fête de Qingming » (fragment)",
+      text:"Scan haute définition. Des segments ont été réécrits automatiquement par l'IA. Des incohérences picturales sont détectées."
+    }
+  };
+
+  const gameState = { choices: [], final: null };
+
+  class Boot extends Phaser.Scene{ constructor(){ super('Boot'); } create(){ this.scene.start('Intro'); } }
+
+  class Intro extends Phaser.Scene{
+    constructor(){ super('Intro'); }
+    create(){
+      const w=this.scale.width, h=this.scale.height;
+      this.cameras.main.setBackgroundColor('#071018');
+      this.add.text(w/2, h/3, 'Les Archives Miroirs', {fontSize:'36px', color:'#fff'}).setOrigin(0.5);
+      const lines=DIALOGUES.intro;
+      let idx=0;
+      const txt=this.add.text(w/2,h/2,lines[0],{fontSize:'20px',color:'#ddd',wordWrap:{width:w*0.8}}).setOrigin(0.5);
+      const next=this.add.text(w/2,h*0.75,'Continuer →',{fontSize:'18px',backgroundColor:'#222',padding:8}).setOrigin(0.5).setInteractive();
+      next.on('pointerup',()=>{
+        idx++;
+        if(idx<lines.length) txt.setText(lines[idx]);
+        else this.scene.start('ArchiveRoom');
+      });
+    }
+  }
+
+  class ArchiveRoom extends Phaser.Scene{
+    constructor(){ super('ArchiveRoom'); }
+    create(){
+      const w=this.scale.width, h=this.scale.height;
+      this.cameras.main.setBackgroundColor('#07121a');
+      this.add.text(20,20,'Salle des archives : Fragment Qingming', {fontSize:'18px'});
+
+      const item = DIALOGUES.qingming;
+      const container = this.add.container(w/2, h/2 - 40);
+      const rect = this.add.rectangle(0,0,320,200,0x325b6e).setStrokeStyle(2,0xffffff,0.06);
+      const label = this.add.text(0,90,item.title,{fontSize:'16px'}).setOrigin(0.5);
+      container.add([rect,label]);
+      container.setSize(320,200);
+      container.setInteractive(new Phaser.Geom.Rectangle(-160,-100,320,200), Phaser.Geom.Rectangle.Contains);
+      container.on('pointerup',()=> this.openArchive(item));
+      container.on('pointerover',()=> rect.setFillStyle(0x3f7b8d));
+      container.on('pointerout',()=> rect.setFillStyle(0x325b6e));
+
+      this.add.text(20,h-60,'Décryptage : Puzzle 3×3 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
+
+      this.choiceText = this.add.text(w-320,20,'Choix : —',{fontSize:'14px'});
+    }
+
+    openArchive(item){
+      const w=this.scale.width, h=this.scale.height;
+      const bg=this.add.rectangle(w/2,h/2, w*0.8, h*0.6, 0x000000,0.92);
+      const box=this.add.container(0,0,[bg]);
+      const title=this.add.text(w/2,h/2-170,item.title,{fontSize:'22px'}).setOrigin(0.5);
+      const text=this.add.text(w/2-(w*0.8)/2+24,h/2-120,item.text,{fontSize:'16px',wordWrap:{width:w*0.8-48}});
+      const b1=this.add.text(w/2-160,h/2+160,'GARDER',{fontSize:'16px',backgroundColor:'#2e7d32',padding:8}).setInteractive();
+      const b2=this.add.text(w/2,h/2+160,'NETTOYER',{fontSize:'16px',backgroundColor:'#f0a000',padding:8}).setInteractive();
+      const b3=this.add.text(w/2+160,h/2+160,'SUPPRIMER',{fontSize:'16px',backgroundColor:'#b71c1c',padding:8}).setInteractive();
+      box.add([title,text,b1,b2,b3]);
+      const close=()=>{ box.destroy(true); };
+      const act=(a)=>{ gameState.choices.push({id:item.id,action:a}); this.updateChoices(); close(); };
+      b1.on('pointerup',()=>act('garder'));
+      b2.on('pointerup',()=>act('nettoyer'));
+      b3.on('pointerup',()=>act('supprimer'));
+    }
+
+    updateChoices(){
+      this.choiceText.setText('Choix : '+gameState.choices.map(c=>c.action).join(', '));
+      if(gameState.choices.length>=1){ this.scene.start('Ending'); }
+    }
+  }
+
+  class Puzzle extends Phaser.Scene{
+    constructor(){ super('Puzzle'); }
+    create(){
+      const w=this.scale.width, h=this.scale.height;
+      this.cameras.main.setBackgroundColor('#06121b');
+      this.add.text(20,20,'Puzzle Qingming (3×3)',{fontSize:'18px'});
+      const grid=3, size=80, pad=10;
+      const total = grid*size + (grid-1)*pad;
+      const sx=w/2-total/2+size/2, sy=h/2-total/2+size/2;
+      this.solution=[1,2,3,4,5,6,7,8,9];
+      this.state=Phaser.Utils.Array.Shuffle(this.solution.slice());
+      this.tiles=[];
+      for(let r=0;r<grid;r++){
+        for(let c=0;c<grid;c++){
+          const idx=r*grid+c;
+          const x=sx+c*(size+pad); const y=sy+r*(size+pad);
+          const t=this.add.rectangle(x,y,size,size,0x3b8aa0).setStrokeStyle(2,0);
+          const num=this.add.text(x,y,''+this.state[idx],{fontSize:'24px'}).setOrigin(0.5);
+          t.value=this.state[idx]; t.numTxt=num;
+          t.setInteractive(); t.on('pointerup',()=>this.click(t));
+          this.tiles.push(t);
+        }
+      }
+      this.sel=null;
+      this.status=this.add.text(w/2,sy+total/2+70,'Objectif : 1-9',{fontSize:'16px'}).setOrigin(0.5);
+      this.add.text(w-120,20,'FERMER',{fontSize:'14px',backgroundColor:'#222',padding:6}).setInteractive().on('pointerup',()=>this.scene.stop());
+    }
+
+    click(tile){
+      if(!this.sel){ tile.setStrokeStyle(4,0xffe082); this.sel=tile; return; }
+      if(tile===this.sel){ tile.setStrokeStyle(2,0); this.sel=null; return; }
+      const a=this.sel,b=tile,tmp=a.value; a.value=b.value; b.value=tmp;
+      a.numTxt.setText(''+a.value); b.numTxt.setText(''+b.value);
+      a.setStrokeStyle(2,0); this.sel=null;
+      if(this.isSolved()){
+        this.status.setText('Puzzle résolu !');
+        gameState.choices.push({id:'puzzle',action:'resolu'});
+      }
+    }
+
+    isSolved(){ return this.tiles.map(t=>t.value).join(',')===this.solution.join(','); }
+  }
+
+  class Ending extends Phaser.Scene{
+    constructor(){ super('Ending'); }
+    create(){
+      const w=this.scale.width,h=this.scale.height;
+      this.cameras.main.setBackgroundColor('#03040a');
+      this.add.text(w/2,h/3,'Décision finale',{fontSize:'24px'}).setOrigin(0.5);
+      const b1=this.add.text(w/2-240,h/2,'MAINTENIR',{fontSize:'16px',backgroundColor:'#1565c0',padding:8}).setInteractive().setOrigin(0.5);
+      const b2=this.add.text(w/2,h/2,'NETTOYER',{fontSize:'16px',backgroundColor:'#2e7d32',padding:8}).setInteractive().setOrigin(0.5);
+      const b3=this.add.text(w/2+240,h/2,'ARRÊTER',{fontSize:'16px',backgroundColor:'#c62828',padding:8}).setInteractive().setOrigin(0.5);
+      this.final=this.add.text(w/2,h*0.75,'',{fontSize:'18px',wordWrap:{width:w*0.8}}).setOrigin(0.5);
+      b1.on('pointerup',()=>this.end('maintenir'));
+      b2.on('pointerup',()=>this.end('nettoyer'));
+      b3.on('pointerup',()=>this.end('arreter'));
+    }
+
+    end(c){
+      const map={
+        maintenir:"Vous maintenez le système. Mémoire parfaite, ambiguïtés effacées.",
+        nettoyer:"Vous nettoyez les données. Les reconstructions IA sont supprimées.",
+        arreter:"Vous arrêtez le système. Le droit à l'oubli revient." };
+      this.final.setText(map[c]);
+      gameState.final=c;
+    }
+  }
+
+  const config={ type:Phaser.AUTO, parent:'game-container', width:1100, height:760, scene:[Boot,Intro,ArchiveRoom,Puzzle,Ending] };
+  new Phaser.Game(config);
+  </script>
+</body>
+</html>
