@@ -424,12 +424,46 @@
         });
     }
 
-    showResult() {
-        this.add.text(60, 380, "Terminé ! Vous avez identifié toutes les métadonnées erronées.", {
-            fontSize: '22px',
-            color: '#222'
+       showResult() {
+        const w = this.scale.width;
+        const h = this.scale.height;
+        
+        // 背景半透明遮罩
+        const bg = this.add.rectangle(w / 2, h / 2, w, h, 0x000000, 0.5);
+        
+        // 对话框背景
+        const dialogBox = this.add.rectangle(w / 2, h / 2, 600, 200, 0xffffff);
+        
+        // 对话框标题
+        const title = this.add.text(w / 2, h / 2 - 60, "Succès !", {
+          fontSize: '28px',
+          color: '#2e7d32',
+          fontStyle: 'bold'
+        }).setOrigin(0.5);
+        
+        // 对话框内容
+        const content = this.add.text(w / 2, h / 2, "Vous avez identifié toutes\nles métadonnées erronées.", {
+          fontSize: '18px',
+          color: '#222',
+          align: 'center'
+        }).setOrigin(0.5);
+        
+        // 关闭按钮
+        const closeBtn = this.add.text(w / 2, h / 2 + 70, "Fermer", {
+          fontSize: '16px',
+          color: '#fff',
+          backgroundColor: '#2e7d32',
+          padding: { x: 20, y: 10 }
+        }).setOrigin(0.5).setInteractive();
+        
+        closeBtn.on('pointerdown', () => {
+          bg.destroy();
+          dialogBox.destroy();
+          title.destroy();
+          content.destroy();
+          closeBtn.destroy();
         });
-    }
+      }
 }
 
   class Ending extends Phaser.Scene{
