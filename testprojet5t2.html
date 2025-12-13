@@ -128,153 +128,166 @@
     }
   }
 
-class Puzzle extends Phaser.Scene {
-  constructor() {
-    super('Puzzle');
-  }
+  class Puzzle extends Phaser.Scene {
+    constructor() { super('Puzzle'); }
 
-  create() {
-    const w = this.scale.width;
-    const h = this.scale.height;
+    create() {
+      const w = this.scale.width;
+      const h = this.scale.height;
 
-    this.cameras.main.setBackgroundColor('#06121b');
-    this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px' });
+      this.cameras.main.setBackgroundColor('#06121b');
+      this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px' });
 
-    const grid = 15;
-    const displayH = 140;
+      const grid = 15;
+      const displayH = 150; // 显示高度（可调整）
 
-    // 原图尺寸
-    const src = this.textures.get('qingming_main').getSourceImage();
-    const imgW = src.width;
-    const imgH = src.height;
+      // 主图原始尺寸
+      const src = this.textures.get('qingming_main').getSourceImage();
+      this.imgW = src.width;
+      this.imgH = src.height;
 
-    const sliceW = Math.floor(imgW / grid);
-    const scale = displayH / imgH;
-    const scaledW = Math.round(sliceW * scale);
+      // 每片在原图中的宽度（像素）
+      this.sliceW = Math.floor(this.imgW / grid);
 
-    const totalW = scaledW * grid;
-    const startX = w / 2 - totalW / 2 + scaledW / 2;
-    const y = h / 2;
+      // 缩放比例（保持总体高度为 displayH）
+      this.scaleFactor = displayH / this.imgH;
+      this.scaledSliceW = Math.round(this.sliceW * this.scaleFactor);
 
-    // 正确顺序
-    this.solution = Array.from({ length: grid }, (_, i) => i);
+      // 整体宽度（不留间隙，确保无重叠/无空缺）
+      const totalW = this.scaledSliceW * grid;
+      const startX = w / 2 - totalW / 2 + this.scaledSliceW / 2;
+      const y = h / 2;
 
-    // 随机顺序
-    const order = Phaser.Utils.Array.Shuffle(this.solution.slice());
+      // 生成目标顺序与随机状态
+      this.solution = Array.from({ length: grid }, (_, i) => i + 1);
+      this.state = Phaser.Utils.Array.Shuffle(this.solution.slice());
 
-    this.slices = [];
+      this.slices = [];
+      this.selected = null;
 
-    for (let i = 0; i < grid; i++) {
-      const index = order[i];
-      const x = startX + i * scaledW;
+      for (let i = 0; i < grid; i++) {
+        const val = this.state[i];
+        const x = startX + i * this.scaledSliceW;
 
-      const piece = this.add.image(x, y, 'qingming_main')
-        .setOrigin(0.5)
-        .setScale(scale)
-        .setCrop(index * sliceW, 0, sliceW, imgH)
-        .setInteractive();
+        const img = this.add.image(x, y, 'qingming_main').setOrigin(0.5);
+        img.setScale(this.scaleFactor);
+        img.currentValue = val;
 
-      piece.correctIndex = index;
-      piece.currentSlot = i;
+        // 在原图上裁切对应片段
+        img.setCrop((val - 1) * this.sliceW, 0, this.sliceW, this.imgH);
 
-      // 边框
-      piece.border = this.add.rectangle(x, y, scaledW, displayH)
-        .setStrokeStyle(2, 0x333333);
+        // 边框用于高亮选择
+        const border = this.add.rectangle(x, y, this.scaledSliceW, displayH).setStrokeStyle(2, 0x333333).setOrigin(0.5);
+        img.border = border;
 
-      this.input.setDraggable(piece);
-      this.slices.push(piece);
+        // 设置交互区域为裁切后的显示大小，避免重叠检测问题
+        img.setInteractive(new Phaser.Geom.Rectangle(-this.scaledSliceW / 2, -displayH / 2, this.scaledSliceW, displayH), Phaser.Geom.Rectangle.Contains);
+        img.on('pointerup', () => this.onSliceClicked(img));
+
+        this.slices.push(img);
+      }
+
+      this.status = this.add.text(w / 2, y + displayH + 30, 'Réorganisez le rouleau...', { fontSize: '16px' }).setOrigin(0.5);
+
+      // 关闭按钮
+      this.add.text(w - 120, 20, 'FERMER', { fontSize: '14px', backgroundColor: '#222', padding: 6 }).setInteractive().on('pointerup', () => this.scene.stop());
     }
 
-    // 拖拽逻辑
-    this.input.on('dragstart', (_, gameObject) => {
-      gameObject.border.setStrokeStyle(3, 0xffe082);
-      this.children.bringToTop(gameObject);
-      this.children.bringToTop(gameObject.border);
-    });
-
-    this.input.on('drag', (_, gameObject, dragX, dragY) => {
-      gameObject.x = dragX;
-      gameObject.y = dragY;
-      gameObject.border.setPosition(dragX, dragY);
-    });
-
-    this.input.on('dragend', (_, gameObject) => {
-      let closest = null;
-      let minDist = Infinity;
-
-      this.slices.forEach(other => {
-        if (other === gameObject) return;
-        const d = Phaser.Math.Distance.Between(
-          gameObject.x, gameObject.y,
-          other.x, other.y
-        );
-        if (d < minDist) {
-          minDist = d;
-          closest = other;
-        }
-      });
-
-      if (closest) {
-        // 交换位置
-        const { x, y } = closest;
-
-        closest.x = gameObject.startX;
-        closest.y = gameObject.startY;
-        closest.border.setPosition(closest.x, closest.y);
-
-        gameObject.x = x;
-        gameObject.y = y;
-        gameObject.border.setPosition(x, y);
-
-        // 交换 slot
-        const tmp = gameObject.currentSlot;
-        gameObject.currentSlot = closest.currentSlot;
-        closest.currentSlot = tmp;
-      } else {
-        // 回到原位
-        gameObject.x = gameObject.startX;
-        gameObject.y = gameObject.startY;
-        gameObject.border.setPosition(gameObject.startX, gameObject.startY);
+    onSliceClicked(img) {
+      if (!this.selected) {
+        this.selected = img;
+        img.border.setStrokeStyle(4, 0xffe082);
+        return;
       }
 
-      gameObject.border.setStrokeStyle(2, 0x333333);
+      if (img === this.selected) {
+        img.border.setStrokeStyle(2, 0x333333);
+        this.selected = null;
+        return;
+      }
+
+      const a = this.selected;
+      const b = img;
+
+      // 交换逻辑：仅交换显示内容编号，不移动显示位置
+      const tmp = a.currentValue;
+      a.currentValue = b.currentValue;
+      b.currentValue = tmp;
+
+      a.setCrop((a.currentValue - 1) * this.sliceW, 0, this.sliceW, this.imgH);
+      b.setCrop((b.currentValue - 1) * this.sliceW, 0, this.sliceW, this.imgH);
+
+      a.border.setStrokeStyle(2, 0x333333);
+      this.selected = null;
 
       if (this.isSolved()) {
-        this.showSuccess();
+        this.status.setText('Puzzle résolu ! Le rouleau est restauré.');
+        gameState.choices.push({ id: 'puzzle_qingming', action: 'resolu' });
       }
-    });
+    }
 
-    // 保存初始位置
-    this.slices.forEach(s => {
-      s.startX = s.x;
-      s.startY = s.y;
-    });
-
-    this.status = this.add.text(
-      w / 2,
-      y + displayH + 30,
-      'Glissez les fragments pour restaurer le rouleau…',
-      { fontSize: '16px' }
-    ).setOrigin(0.5);
-
-    this.add.text(w - 120, 20, 'FERMER', {
-      fontSize: '14px',
-      backgroundColor: '#222',
-      padding: 6
-    })
-    .setInteractive()
-    .on('pointerup', () => this.scene.stop());
+    isSolved() {
+      for (let i = 0; i < this.solution.length; i++) {
+        if (this.slices[i].currentValue !== this.solution[i]) return false;
+      }
+      return true;
+    }
   }
+  
+  class ScrollableQingming extends Phaser.Scene {
+    constructor() { super('ScrollableQingming'); }
 
-  isSolved() {
-    return this.slices.every(s => s.currentSlot === s.correctIndex);
-  }
+    preload() {
+      // 已在主场景 preload 过的可省略
+      // this.load.image('qingming_main', 'assets/qingming_main.png');
+    }
 
-  showSuccess() {
-    this.status.setText('Puzzle résolu ! Le rouleau est restauré.');
-    gameState.choices.push({ id: 'puzzle_qingming', action: 'resolu' });
+    create() {
+      this.cameras.main.setBackgroundColor('#000');
+
+      const w = this.scale.width;
+      const h = this.scale.height;
+
+      // 获取主图尺寸
+      const src = this.textures.get('qingming_main').getSourceImage();
+      const imgW = src.width;
+      const imgH = src.height;
+
+      // 居中显示，但保持原始尺寸（长卷更真实）
+      this.roll = this.add.image(0, h / 2, 'qingming_main')
+        .setOrigin(0, 0.5);
+
+      // 开启拖拽
+      this.input.setDraggable(this.roll);
+
+      this.roll.on('drag', (pointer, dragX) => {
+        // 水平拖动
+        this.roll.x = dragX;
+
+        // 限制左右边界，不让图像拖出太多
+        if (this.roll.x > 0) this.roll.x = 0;  // 左侧极限
+        if (this.roll.x < w - imgW) this.roll.x = w - imgW; // 右侧极限
+      });
+
+      // 让图像可被拖动
+      this.roll.setInteractive();
+
+      // 提示文本
+      this.add.text(w / 2, 30, '▲ Faites glisser horizontalement pour parcourir le rouleau ▲', {
+        fontSize: '16px',
+        color: '#ffffff'
+      }).setOrigin(0.5);
+
+      // 返回按钮
+      this.add.text(w - 120, 20, 'FERMER', {
+        fontSize: '14px',
+        backgroundColor: '#222',
+        padding: 6
+      })
+        .setInteractive()
+        .on('pointerup', () => this.scene.stop());
+    }
   }
-}
 
   class MetadataScene extends Phaser.Scene {
     constructor() {
