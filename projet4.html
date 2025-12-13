@@ -2,14 +2,20 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <title>Optimisation du jeu – Métadonnées</title>
+  <title>Optimisation du jeu – Metadata</title>
 </head>
 <body>
 
-  <h2>Optimisation du module <em>metadata</em>, correction de bugs et ajout d’un compteur de réponses correctes</h2>
+  <h2>Optimisation du jeu <em>metadata</em></h2>
 
-  <h3>Code source (avant optimisation)</h3>
+  <p>
+    1. Correction de bugs, ajout d’un compteur de bonnes réponses et correction de la logique de fin de jeu.<br>
+    2. Amélioration de l’affichage du résultat avec l’ajout d’une boîte de dialogue de succès et d’un bouton de fermeture.
+  </p>
 
+  <h3>1. Gestion du comptage et de la fin du jeu</h3>
+
+  <h4>Code source (avant optimisation)</h4>
   <pre>
 // Événement de clic
 textObj.on('pointerdown', () => {
@@ -28,14 +34,13 @@ textObj.on('pointerdown', () => {
 });
   </pre>
 
-  <h3>Code optimisé</h3>
-
+  <h4>Code optimisé</h4>
   <pre>
 // Événement de clic
 textObj.on('pointerdown', () => {
     if (line.wrong) {
         textObj.setColor('#d60000'); // Rouge = bon choix (phrase incorrecte)
-        this.selected++;  // Incrémenter uniquement en cas de bonne sélection
+        this.selected++;  // Comptabilisation uniquement en cas de bonne réponse
     } else {
         textObj.setColor('#00a000'); // Vert = sélection incorrecte
     }
@@ -46,6 +51,70 @@ textObj.on('pointerdown', () => {
         this.showResult();
     }
 });
+  </pre>
+
+  <h3>2. Amélioration de l’affichage du résultat</h3>
+
+  <h4>Code source (avant modification)</h4>
+  <pre>
+showResult() {
+    this.add.text(60, 380,
+      "Terminé ! Vous avez identifié toutes les métadonnées erronées.",
+      {
+        fontSize: '22px',
+        color: '#222'
+      }
+    );
+}
+  </pre>
+
+  <h4>Code modifié</h4>
+  <pre>
+showResult() {
+    const w = this.scale.width;
+    const h = this.scale.height;
+
+    // Fond semi-transparent
+    const bg = this.add.rectangle(w / 2, h / 2, w, h, 0x000000, 0.5);
+
+    // Boîte de dialogue
+    const dialogBox = this.add.rectangle(w / 2, h / 2, 600, 200, 0xffffff);
+
+    // Titre
+    const title = this.add.text(w / 2, h / 2 - 60, "Succès !", {
+        fontSize: '28px',
+        color: '#2e7d32',
+        fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    // Contenu
+    const content = this.add.text(
+        w / 2,
+        h / 2,
+        "Vous avez identifié toutes\nles métadonnées erronées.",
+        {
+            fontSize: '18px',
+            color: '#222',
+            align: 'center'
+        }
+    ).setOrigin(0.5);
+
+    // Bouton de fermeture
+    const closeBtn = this.add.text(w / 2, h / 2 + 70, "Fermer", {
+        fontSize: '16px',
+        color: '#fff',
+        backgroundColor: '#2e7d32',
+        padding: { x: 20, y: 10 }
+    }).setOrigin(0.5).setInteractive();
+
+    closeBtn.on('pointerdown', () => {
+        bg.destroy();
+        dialogBox.destroy();
+        title.destroy();
+        content.destroy();
+        closeBtn.destroy();
+    });
+}
   </pre>
 
 </body>
@@ -59,7 +128,7 @@ textObj.on('pointerdown', () => {
 
 
 
-优化游戏matadata，修复bug，增加选对计数功能
+优化游戏matadata： 1. 修复bug，增加选对计数功能,修复游戏结束判断逻辑； 2.增强结果显示功能，添加成功对话框和关闭按钮
 
 源代码：        // 点击事件
         textObj.on('pointerdown', () => {
@@ -91,3 +160,51 @@ textObj.on('pointerdown', () => {
                 if (this.selected === this.totalWrong) {
                     this.showResult();
                 }
+2. 源代码：
+showResult() {
+        this.add.text(60, 380, "Terminé ! Vous avez identifié toutes les métadonnées erronées.", {
+            fontSize: '22px',
+            color: '#222'
+
+
+修改后：
+
+ showResult() {
+        const w = this.scale.width;
+        const h = this.scale.height;
+        
+        // 背景半透明遮罩
+        const bg = this.add.rectangle(w / 2, h / 2, w, h, 0x000000, 0.5);
+        
+        // 对话框背景
+        const dialogBox = this.add.rectangle(w / 2, h / 2, 600, 200, 0xffffff);
+        
+        // 对话框标题
+        const title = this.add.text(w / 2, h / 2 - 60, "Succès !", {
+          fontSize: '28px',
+          color: '#2e7d32',
+          fontStyle: 'bold'
+        }).setOrigin(0.5);
+        
+        // 对话框内容
+        const content = this.add.text(w / 2, h / 2, "Vous avez identifié toutes\nles métadonnées erronées.", {
+          fontSize: '18px',
+          color: '#222',
+          align: 'center'
+        }).setOrigin(0.5);
+        
+        // 关闭按钮
+        const closeBtn = this.add.text(w / 2, h / 2 + 70, "Fermer", {
+          fontSize: '16px',
+          color: '#fff',
+          backgroundColor: '#2e7d32',
+          padding: { x: 20, y: 10 }
+        }).setOrigin(0.5).setInteractive();
+        
+        closeBtn.on('pointerdown', () => {
+          bg.destroy();
+          dialogBox.destroy();
+          title.destroy();
+          content.destroy();
+          closeBtn.destroy();
+        });
