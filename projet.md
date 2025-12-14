@@ -145,7 +145,6 @@ flowchart TD
     K -->|Maintenir le système| L[Fin 1 : Mémoire parfaite<br/>Vérité altérée]
     K -->|Nettoyer les données| M[Fin 2 : Archives restaurées<br/>IA supprimée]
     K -->|Fermer le système| N[Fin 3 : Droit à l’oubli<br/>Fin des Archives]
-
 ```
 
 ---
