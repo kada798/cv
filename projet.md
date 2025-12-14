@@ -121,19 +121,31 @@ Page d’entrée du projet.
 Elle charge le moteur Phaser 3, les scripts nécessaires et les ressources initiales.
 C’est à partir de ce fichier que le jeu est exécuté dans le navigateur.
 
+```mermaid 
+flowchart TD
+    A[Lancement du jeu] --> B[Introduction narrative<br/>Contexte futur & Archives Miroirs]
 
-## 5. AIGC
-https://chatgpt.com/share/69254c3b-9988-8008-b694-53fee46f7d50
+    B --> C[Salle des archives]
+    C --> D[Exploration des fragments]
 
+    D --> E[Analyse des métadonnées]
+    E --> F{Données corrompues ?}
 
+    F -->|Oui| G[Mini-jeu de décryptage<br/>Puzzle / reconstruction]
+    G --> H[Fragment restauré]
 
+    F -->|Non| H[Fragment authentique]
 
+    H --> I[Choix du joueur<br/>Garder / Nettoyer / Supprimer]
+    I --> D
 
+    I --> J[Accumulation des décisions]
 
+    J --> K{Décision finale}
+    K -->|Maintenir le système| L[Fin 1 : Mémoire parfaite<br/>Vérité altérée]
+    K -->|Nettoyer les données| M[Fin 2 : Archives restaurées<br/>IA supprimée]
+    K -->|Fermer le système| N[Fin 3 : Droit à l’oubli<br/>Fin des Archives]
 
-
-
-//```mermaid 
-//```
+```
 
 ---

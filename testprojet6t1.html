@@ -138,7 +138,7 @@ class Puzzle extends Phaser.Scene {
     const h = this.scale.height;
 
     this.cameras.main.setBackgroundColor('#06121b');
-    this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px', color: '#ffffff' });
+    this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px' });
 
     const grid = 15;
     const displayH = 140;
@@ -150,114 +150,121 @@ class Puzzle extends Phaser.Scene {
 
     const sliceW = Math.floor(imgW / grid);
     const scale = displayH / imgH;
-    const scaledW = Math.round(sliceW * scale);
 
-    const totalW = scaledW * grid;
-    const startX = w / 2 - totalW / 2 + scaledW / 2;
+    const totalW = sliceW * scale * grid;
+    const startX = w / 2 - totalW / 2 + sliceW * scale / 2;
     const y = h / 2;
 
-    // 创建固定槽位
+    // 正确顺序数组
+    this.solution = Array.from({ length: grid }, (_, i) => i);
+
+    // 槽位数组
     this.slots = [];
     for (let i = 0; i < grid; i++) {
-      const x = startX + i * scaledW;
-      const slotRect = this.add.rectangle(x, y, scaledW, displayH)
-        .setStrokeStyle(2, 0x333333);
-      this.slots.push({ x, y, slotRect, piece: null });
+      const xSlot = startX + i * sliceW * scale;
+      this.slots.push({ x: xSlot, y: y, index: i });
     }
 
-    // 创建碎片池（放置区）
-    const poolY = h - 180; // 放置区在底部
-    const poolXStart = w / 2 - (grid * scaledW) / 2;
-    const order = Phaser.Utils.Array.Shuffle(Array.from({ length: grid }, (_, i) => i));
+    // 创建碎片
+    const order = Phaser.Utils.Array.Shuffle(this.solution.slice());
+    this.slices = [];
 
-    this.pool = [];
     for (let i = 0; i < grid; i++) {
-      const index = order[i];
-      const piece = this.add.image(poolXStart + i * scaledW, poolY, 'qingming_main')
+      const correctIndex = i;         // 正确位置
+      const currentIndex = order[i];  // 初始随机位置
+      const slot = this.slots[currentIndex];
+
+      const container = this.add.container(slot.x, slot.y);
+      container.correctIndex = correctIndex;
+      container.currentSlot = currentIndex;
+
+      // 图片
+      const piece = this.add.image(0, 0, 'qingming_main')
         .setOrigin(0.5)
         .setScale(scale)
-        .setCrop(index * sliceW, 0, sliceW, imgH)
-        .setInteractive();
+        .setCrop(correctIndex * sliceW, 0, sliceW, imgH);
 
-      piece.correctIndex = index;
-      piece.startX = piece.x;
-      piece.startY = piece.y;
+      // 边框
+      const border = this.add.rectangle(0, 0, sliceW * scale, displayH)
+        .setStrokeStyle(2, 0x333333);
 
-      this.input.setDraggable(piece);
-      this.pool.push(piece);
+      container.add([piece, border]);
+      container.piece = piece;
+      container.border = border;
+
+      // 更新方法
+      container.updatePosition = () => {
+        const s = this.slots[container.currentSlot];
+        container.x = s.x;
+        container.y = s.y;
+      };
+
+      container.setSize(sliceW * scale, displayH);
+      container.setInteractive();
+      this.input.setDraggable(container);
+
+      this.slices.push(container);
     }
 
     // 拖拽逻辑
-    this.input.on('drag', (_, piece, dragX, dragY) => {
-      piece.x = dragX;
-      piece.y = dragY;
+    this.input.on('dragstart', (_, container) => {
+      container.border.setStrokeStyle(3, 0xffe082);
+      this.children.bringToTop(container);
     });
 
-    this.input.on('dragend', (_, piece) => {
-      // 找最近的空槽位
-      let closest = null;
+    this.input.on('drag', (_, container, dragX, dragY) => {
+      container.x = dragX;
+      container.y = dragY;
+    });
+
+    this.input.on('dragend', (_, container) => {
+      // 找最近槽位
+      let closestSlot = null;
       let minDist = Infinity;
       this.slots.forEach(slot => {
-        if (slot.piece) return; // 槽位已占用
-        const d = Phaser.Math.Distance.Between(piece.x, piece.y, slot.x, slot.y);
+        const d = Phaser.Math.Distance.Between(container.x, container.y, slot.x, slot.y);
         if (d < minDist) {
           minDist = d;
-          closest = slot;
+          closestSlot = slot;
         }
       });
 
-      if (closest && minDist < 50) { // 距离阈值内才放入
-        piece.x = closest.x;
-        piece.y = closest.y;
+      if (!closestSlot) return;
 
-        // 如果之前碎片在槽位里，需要先清除
-        if (piece.currentSlot !== undefined) {
-          this.slots[piece.currentSlot].piece = null;
-        }
+      // 判断槽位是否被占用
+      const target = this.slices.find(c => c !== container && c.currentSlot === closestSlot.index);
 
-        closest.piece = piece;
-        piece.currentSlot = this.slots.indexOf(closest);
+      if (target) {
+        // 交换槽位
+        const tmp = container.currentSlot;
+        container.currentSlot = target.currentSlot;
+        target.currentSlot = tmp;
+
+        container.updatePosition();
+        target.updatePosition();
       } else {
-        // 回到放置区
-        piece.x = piece.startX;
-        piece.y = piece.startY;
-
-        if (piece.currentSlot !== undefined) {
-          this.slots[piece.currentSlot].piece = null;
-          delete piece.currentSlot;
-        }
+        // 空位 → 直接占用
+        container.currentSlot = closestSlot.index;
+        container.updatePosition();
       }
+
+      container.border.setStrokeStyle(2, 0x333333);
 
       if (this.isSolved()) this.showSuccess();
     });
 
-    // 提示文字
-    this.status = this.add.text(
-      w / 2, y + displayH + 30,
-      'Glissez les fragments pour restaurer le rouleau…',
-      { fontSize: '16px', color: '#ffffff' }
-    ).setOrigin(0.5);
-
-    // 关闭按钮
-    this.add.text(w - 120, 20, 'FERMER', {
-      fontSize: '14px',
-      backgroundColor: '#222',
-      padding: 6,
-      color: '#fff'
-    })
-    .setInteractive()
-    .on('pointerup', () => this.scene.stop());
+    // 状态文字
+    this.status = this.add.text(w / 2, y + displayH + 30,
+      '拖动碎片还原卷轴…', { fontSize: '16px' })
+      .setOrigin(0.5);
   }
 
-  // 判断是否完成
   isSolved() {
-    return this.slots.every((slot, i) => slot.piece && slot.piece.correctIndex === i);
+    return this.slices.every(c => c.currentSlot === c.correctIndex);
   }
 
-  // 成功提示
   showSuccess() {
-    this.status.setText('Puzzle résolu ! Le rouleau est restauré.');
-    gameState.choices.push({ id: 'puzzle_qingming', action: 'resolu' });
+    this.status.setText('Puzzle résolu ! 卷轴已还原');
   }
 }
 

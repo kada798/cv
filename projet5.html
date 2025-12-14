@@ -1,7 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Refonte simplifiée du jeu</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+    h2 { color: #2c3e50; }
+    ul { margin-bottom: 20px; }
+    li { margin-bottom: 10px; }
+    a { color: #2980b9; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h2>Objectif de la refonte</h2>
+  <p>Simplifier le jeu et rendre l'expérience plus intuitive pour les joueurs.</p>
+
+  <h2>Modifications principales</h2>
+  <ul>
+    <li>Modification des dialogues d'introduction : simplification des fenêtres et ajout de l'histoire de fond et des instructions de jeu pour que le joueur comprenne rapidement le fonctionnement.</li>
+    <li>Suppression de la section de choix final et des branches complexes, passage à un flux de tâches linéaire pour réduire la difficulté.</li>
+    <li>Transformation du puzzle : passage du clic pour échanger à un glisser-déposer, amélioration de l'expérience utilisateur ; suppression du puzzle déroulant au profit d’un puzzle fixe pour simplifier le gameplay.Plusieurs versions de test sont disponibles ici :testprojet5t1.html，testprojet5t2.html .  Discussion avec l'IA : <a href="https://chatgpt.com/share/693edd52-77c0-8008-ae7d-e697b495ed77">lien</a>.</li>
+  </ul>
+
+  <h2>Problèmes rencontrés</h2>
+  <ul>
+    <li>Décalage entre les pièces sélectionnées et les bordures lors du clic.</li>
+    <li>Logique de glisser-déposer complexe avec de nombreux bugs, malgré plusieurs tentatives de débogage.</li>
+  </ul>
+
+  <h2>Conclusion</h2>
+  <p>La simplification du jeu vise à améliorer la prise en main et à réduire les sources de bug, mais certaines limitations techniques liées au puzzle persistent.</p>
+</body>
+</html>
+
+
 
 全面简化游戏，更新游戏说明介绍，使玩家更容易上手游戏。
 1. 修改引导对话框内容，简化页面切换，增加背景故事和任务说明，使玩家迅速明白怎么玩这个游戏。
 2. 删除最终抉择版块，删除复杂的选择分支，改为线性任务流程，降低游戏难度。
-3. 将puzzle的点击交换改为拖拽交换，提升操作体验；删除滚轴拼图，改为固定拼图，简化玩法。
+3. 将puzzle的点击交换改为拖拽交换，提升操作体验；删除滚轴拼图，改为固定拼图，简化玩法。与AI讨论过程如下：https://chatgpt.com/share/693edd52-77c0-8008-ae7d-e697b495ed77
 
-问题：点击选中的拼图碎片、边框错位
+问题：点击选中的拼图碎片、边框错位；拖拽交换逻辑复杂，bug较多，多次调试，但解决困难。
