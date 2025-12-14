@@ -54,6 +54,84 @@
 </html>
 
 
+flowchart TD
+    A[Début du projet Puzzle Qingming] --> B[Idée initiale : échange par clic]
+    
+    B --> B1[Implémentation du clic pour échanger]
+    B1 --> B2[Problèmes détectés]
+    
+    B2 --> B21[Décalage entre cadres et pièces]
+    B2 --> B22[Difficulté à identifier la pièce à échanger]
+    B2 --> B23[Logique complexe et bugs persistants]
+    
+    B23 --> C[Changement de stratégie]
+    
+    C --> D[Essai : échange par glisser-déposer]
+    D --> D1[Enregistrement position de départ]
+    D --> D2[Échange avec la pièce la plus proche]
+    
+    D2 --> D3[Problèmes persistants]
+    D3 --> D31[Décalage toujours présent]
+    D3 --> D32[Échange difficile à déterminer]
+    
+    D3 --> E[Tentative de simplification]
+    E --> E1[Suppression de l'échange automatique]
+    E1 --> E2[Placement manuel uniquement]
+    E2 --> E3[Nouveaux bugs apparaissent]
+    
+    E3 --> F[Phase de réflexion]
+    
+    F --> G[Nouvelle analyse de la logique]
+    G --> G1[Découper les pièces]
+    G --> G2[Mélanger l'ordre aléatoirement]
+    G --> G3[Comparer position actuelle et position cible]
+    
+    G3 --> H[Décision finale]
+    H --> I[Séparation du pool de pièces et de la zone fixe]
+    I --> J[Simplification de la logique]
+    
+    J --> K[Résolution des principaux problèmes]
+
+## Diagramme de flux du projet
+
+```mermaid
+    A[Lancement du jeu] --> B[Scene Intro]
+    B --> C[Salle des archives]
+    
+    C --> D[Sélection de l'œuvre Qingming]
+    
+    D --> E[Accès au Puzzle]
+    
+    E --> F[Chargement de l'image principale]
+    F --> G[Découpage en 15 fragments]
+    
+    G --> H[Mélange aléatoire des fragments]
+    H --> I[Affichage du pool de pièces]
+    H --> J[Affichage des emplacements fixes]
+    
+    I --> K[Interaction joueur : glisser-déposer]
+    
+    K --> L{Emplacement cible vide ?}
+    L -->|Oui| M[Placer la pièce]
+    L -->|Non| N[Refuser le placement]
+    
+    M --> O[Vérification de la solution]
+    O --> P{Puzzle résolu ?}
+    
+    P -->|Non| K
+    P -->|Oui| Q[Puzzle validé]
+    
+    Q --> R[Accès à la scène Métadonnées]
+    
+    R --> S[Sélection des phrases erronées]
+    S --> T{Toutes les erreurs trouvées ?}
+    
+    T -->|Non| S
+    T -->|Oui| U[Succès et validation]
+```
+
+
+
 1.优化游戏入口按钮坐标，将其由页面左下角调整至页面中间，提升用户点击体验。
 2.逐步理解代码后发现，currentSlot / startX / startY 的语义是混乱的，slot 被当成了“逻辑位置 + 显示坐标 + 交换依据”，这是 bug 的根源之一。
 然而，调整过程代码过于复杂，bug（边框和碎片始终不同步，碎片放置交换逻辑有问题）多次尝试简化，但一直没有解决。与Ai讨论过程如下：https://chatgpt.com/share/693ecb01-7834-8008-9a66-eeb615f1097d
