@@ -86,7 +86,7 @@ Diagramme de l’expérience joueur
     style K fill:#FFCCCC,stroke:#333
     style L fill:#CCFFCC,stroke:#333
     style M fill:#FFFFCC,stroke:#333
-
+```
 
 
 ```mermaid 
@@ -159,6 +159,4 @@ Diagramme du processus de conception et de débogage
     G3 --> H[Décision finale]
     H --> I[Séparation du pool de pièces et de la zone fixe]
     I --> J[Simplification de la logique]
-
-    J --> K[Résolution des principaux problèmes]
 ```
