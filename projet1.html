@@ -23,16 +23,17 @@
 ## Diagramme de flux du projet
 
 ```mermaid
-
-flowchart TD
+Diagramme de flux du projet
     A[Lancement du jeu] --> B[Dialogue d’introduction]
-    B --> C[Salle des archives]
+    B --> C[Salle des archives：Qingming Peinture]
 
-    C --> D[Sélection du fragment<br/>Qingming Shanghe Tu]
+    C --> D[Sélection du fragment<br/>Qingming Peinture]
     D --> E[Lecture des métadonnées]
 
     E --> F[Puzzle 3×3]
     F -->|Puzzle résolu| G[Choix enregistré]
 
     G --> H[Décision finale]
-    H --> I[Fin du jeu]```
+    H --> I[Choix du joueur<br/>Garder / Nettoyer / Supprimer]
+    I --> J[Fin du jeu]
+    ```

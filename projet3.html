@@ -22,24 +22,10 @@ Nouveau problème : à l’ouverture du puzzle, l’écran reste noir et l’ima
     Cependant, avec <code>displayW = 80</code>, l’écart est trop grand :  
     largeur réelle ≈ 46px → différence = 80 − 46 = 34px d’espace perdu de chaque côté du fragment.
   </p>
-  </body>
-</html>
+ 
 
-
-
-
-
-
-2025.12.02
-
-调整了碎片间距和显示宽度以优化布局
-新问题：打开拼图时，显示时黑屏，加载不出图片；退出第二次点击时可以看到图片。
-
-
-
-在  class Puzzle extends Phaser.Scene部分
-源代码：displayW 控制空间分为，46px 是实际内容。两者一起确保了拼图整齐排列且留有视觉呼吸空间。但display为80，displayW = 80px（逻辑位置间隔）实际图像宽度 ≈ 46px
-差额 = 80 - 46 = 34px 的浪费空间（每个切片两侧）
+  <h4>Code source (avant modification)</h4>
+  <pre>
 
       const grid = 15;
       const spacing = 4;
@@ -50,13 +36,21 @@ Nouveau problème : à l’ouverture du puzzle, l’écran reste noir et l’ima
       this.imgW = src.width;
       this.imgH = src.height;
       this.sliceW = Math.floor(this.imgW / grid);
+  </pre>
 
-订正：
+<h4>Code modifié</h4>
+  <pre>
 const grid = 15;
 const spacing = 4;
 const displayH = 120;
 const scale = displayH / this.imgH;  // 0.358
 const scaledSliceW = Math.floor(this.sliceW * scale);  // 自动 = 46px
 const displayW = scaledSliceW + spacing;  // 50px（图像 + 空隙）
+</pre>
 
+</body>
+</html>
 
+在  class Puzzle extends Phaser.Scene部分
+源代码：displayW 控制空间分为，46px 是实际内容。两者一起确保了拼图整齐排列且留有视觉呼吸空间。但display为80，displayW = 80px（逻辑位置间隔）实际图像宽度 ≈ 46px
+差额 = 80 - 46 = 34px 的浪费空间（每个切片两侧）

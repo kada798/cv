@@ -72,9 +72,7 @@ Diagramme de l’expérience joueur
     J -- T -> Non --> K;
     J -- T -> Oui --> L(Succès et validation);
 
-    K --> M{Réessayer};
-    M --> C;
-
+  
     style A fill:#CCCCFF,stroke:#333
     style B fill:#CCCCFF,stroke:#333
     style C fill:#CCCCFF,stroke:#333
