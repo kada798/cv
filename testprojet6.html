@@ -34,15 +34,68 @@
     }
   };
 
-  const gameState = { choices: [], final: null };
+  const gameState = {
+    tasks: {
+      puzzle: false,
+      metadata: false
+    },
+    choices: [],
+    final: null
+  };
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+  const FINAL_CHOICES = [
+    {
+      id: 'maintain',
+      label: 'Maintenir le système',
+      action: 'garder',
+      description: "Ajuster les paramètres de l'IA et conserver la mémoire reconstruite."
+    },
+    {
+      id: 'clean',
+      label: 'Nettoyer les données',
+      action: 'nettoyer',
+      description: "Supprimer les ajouts générés par l'IA pour restaurer l'archive."
+    },
+    {
+      id: 'close',
+      label: 'Fermer les Archives',
+      action: 'supprimer',
+      description: "Arrêter le système et rendre à l'humanité le droit à l'oubli."
+    }
+  ];
+
+  const ENDINGS = {
+    maintain: {
+      title: 'Fin 1 : Mémoire parfaite',
+      subtitle: 'La machine continue.',
+      text: "Vous ajustez les paramètres de l'IA. Les Archives Miroirs restent ouvertes et promettent une mémoire sans lacune. Mais chaque restauration ajoute une couche d'interprétation. Le passé devient plus lisible, et moins certain."
+    },
+    clean: {
+      title: 'Fin 2 : Archives restaurées',
+      subtitle: 'La vérité redevient fragile.',
+      text: "Vous nettoyez les données synthétiques. Les fragments inventés disparaissent, laissant des vides, des silences et des zones d'ombre. L'archive retrouve son intégrité, mais aussi son incomplétude."
+    },
+    close: {
+      title: "Fin 3 : Droit à l'oubli",
+      subtitle: 'Le miroir se tait.',
+      text: "Vous fermez définitivement le système. Les reconstitutions s'effacent avec les anomalies. L'humanité perd une mémoire totale, mais retrouve un espace où le passé peut rester partiel, disputé, vivant."
+    }
+  };
+
+  function resetGameState(){
+    gameState.tasks.puzzle = false;
+    gameState.tasks.metadata = false;
+    gameState.choices.length = 0;
+    gameState.final = null;
+  }
 
   class Boot extends Phaser.Scene{ constructor(){ super('Boot'); }preload(){
     // 加载清明上河图主图（用于缩略图）
     this.load.image('qingming_thumb', 'assets/qingming_thumb.png');
     // 主图，用于 Puzzle 横向拼图
     this.load.image('qingming_main', 'assets/qingming_main.png');
-  } create(){ this.scene.start('Intro'); } }
+  } create(){ resetGameState(); this.scene.start('Intro'); } }
 
   class Intro extends Phaser.Scene{
     constructor(){ super('Intro'); }
@@ -117,21 +170,79 @@
       container.on('pointerout',()=> img.clearTint());
 
 
+      this.choiceText = this.add.text(18,header.y + header.height + 16,'Choix final : —',{fontSize:isMobile ? '13px' : '14px'});
+      this.updateChoices();
+      this.drawProgress(header.y + header.height + 42, isMobile);
+
       const navX = w / 2;
       const navY = isMobile ? Math.min(h - 122, containerY + thumbH / 2 + label.height + 70) : h - 300;
-      this.add.text(navX,navY,'Décryptage : Puzzle 15×1 →',{fontSize:isMobile ? '14px' : '16px',backgroundColor:'#222',padding:{x:10,y:8}}).setOrigin(0.5).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
+      const allTasksDone = gameState.tasks.puzzle && gameState.tasks.metadata;
 
-      this.choiceText = this.add.text(18,header.y + header.height + 16,'Choix : —',{fontSize:isMobile ? '13px' : '14px'});
-      this.add.text(navX,navY + 52, "MetadataScene", {
-    fontSize: isMobile ? "20px" : "24px",
-    color: "#0077ff"
-})
-.setOrigin(0.5)
-.setInteractive()
-.on('pointerdown', () => {
-    this.scene.start("MetadataScene");
-});
+      if (allTasksDone && !gameState.final) {
+        this.showFinalDecision(navX, isMobile ? Math.max(h - 260, navY - 90) : navY - 20, isMobile);
+      } else {
+        const puzzleLabel = gameState.tasks.puzzle ? 'Puzzle restauré ✓' : 'Décryptage : Puzzle 15×1 →';
+        this.add.text(navX,navY,puzzleLabel,{fontSize:isMobile ? '14px' : '16px',backgroundColor:'#222',padding:{x:10,y:8}}).setOrigin(0.5).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
 
+        const metadataLabel = gameState.tasks.metadata ? 'Métadonnées corrigées ✓' : 'Métadonnées';
+        this.add.text(navX,navY + 52, metadataLabel, {
+          fontSize: isMobile ? "20px" : "24px",
+          color: gameState.tasks.metadata ? "#35b779" : "#0077ff"
+        })
+        .setOrigin(0.5)
+        .setInteractive()
+        .on('pointerdown', () => {
+          this.scene.start("MetadataScene");
+        });
+      }
+
+    }
+
+    drawProgress(y, isMobile){
+      const status = [
+        `${gameState.tasks.puzzle ? '✓' : '□'} Puzzle restauré`,
+        `${gameState.tasks.metadata ? '✓' : '□'} Métadonnées vérifiées`
+      ].join('   ');
+      this.add.text(18,y,status,{
+        fontSize:isMobile ? '12px' : '14px',
+        color:'#b9d8ff',
+        wordWrap:{width:this.scale.width-36}
+      });
+    }
+
+    showFinalDecision(x, y, isMobile){
+      const w=this.scale.width;
+      const title = this.add.text(x,y,"Décision finale",{
+        fontSize:isMobile ? '18px' : '22px',
+        color:'#ffffff',
+        align:'center'
+      }).setOrigin(0.5);
+      const text = this.add.text(x,y + 30,"Que faut-il faire de l'archive restaurée ?",{
+        fontSize:isMobile ? '13px' : '15px',
+        color:'#d7e7ef',
+        align:'center',
+        wordWrap:{width:w*0.86}
+      }).setOrigin(0.5,0);
+
+      let buttonY = y + (isMobile ? 82 : 86);
+      FINAL_CHOICES.forEach(choice => {
+        const btn = this.add.text(x,buttonY,choice.label,{
+          fontSize:isMobile ? '13px' : '15px',
+          color:'#fff',
+          backgroundColor:'#25323c',
+          padding:{x:12,y:8},
+          align:'center',
+          wordWrap:{width:w*0.74}
+        }).setOrigin(0.5).setInteractive();
+        btn.on('pointerup',()=>this.chooseFinal(choice));
+        buttonY += isMobile ? 42 : 46;
+      });
+    }
+
+    chooseFinal(choice){
+      gameState.final = choice.id;
+      gameState.choices.push({ id:'qingming_final', action:choice.action, label:choice.label });
+      this.scene.start('Ending');
     }
 
     openArchive(item){
@@ -172,6 +283,7 @@ class Puzzle extends Phaser.Scene {
     const h = this.scale.height;
 
     this.cameras.main.setBackgroundColor('#06121b');
+    this.solved = gameState.tasks.puzzle;
     this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px', color: '#ffffff' });
 
     const grid = 15;
@@ -307,7 +419,7 @@ class Puzzle extends Phaser.Scene {
       color: '#fff'
     })
     .setInteractive()
-    .on('pointerup', () => this.scene.stop());
+    .on('pointerup', () => this.scene.start('ArchiveRoom'));
   }
 
   // 判断是否完成
@@ -317,8 +429,10 @@ class Puzzle extends Phaser.Scene {
 
   // 成功提示
   showSuccess() {
-    this.status.setText('Puzzle résolu ! Le rouleau est restauré.');
-    gameState.choices.push({ id: 'puzzle_qingming', action: 'resolu' });
+    if (this.solved) return;
+    this.solved = true;
+    gameState.tasks.puzzle = true;
+    this.status.setText('Puzzle résolu ! Le rouleau est restauré. Fermez pour revenir aux archives.');
   }
 }
 
@@ -407,13 +521,14 @@ class Puzzle extends Phaser.Scene {
         })
         .setInteractive()
         .on('pointerdown', () => {
-            this.scene.start("Puzzle");
+            this.scene.start("ArchiveRoom");
         });
     }
 
        showResult() {
         const w = this.scale.width;
         const h = this.scale.height;
+        gameState.tasks.metadata = true;
         
         // 背景半透明遮罩
         const bg = this.add.rectangle(w / 2, h / 2, w, h, 0x000000, 0.5);
@@ -444,17 +559,73 @@ class Puzzle extends Phaser.Scene {
           padding: { x: 20, y: 10 }
         }).setOrigin(0.5).setInteractive();
         
-        closeBtn.on('pointerdown', () => {
-          bg.destroy();
-          dialogBox.destroy();
-          title.destroy();
-          content.destroy();
-          closeBtn.destroy();
-        });
+        closeBtn.on('pointerdown', () => this.scene.start("ArchiveRoom"));
       }
 }
 
-// `Ending` scene 已移除 —— 如需恢复可从版本控制回退本段代码。
+class Ending extends Phaser.Scene {
+  constructor(){
+    super('Ending');
+  }
+
+  create(){
+    const w=this.scale.width, h=this.scale.height;
+    const isMobile = w < 620;
+    const ending = ENDINGS[gameState.final] || ENDINGS.clean;
+    this.cameras.main.setBackgroundColor('#05080d');
+
+    const margin = isMobile ? 28 : 80;
+    const wrapWidth = w - margin * 2;
+    const titleY = isMobile ? h * 0.12 : h * 0.18;
+
+    this.add.text(w/2,titleY,ending.title,{
+      fontSize:isMobile ? '24px' : '36px',
+      color:'#ffffff',
+      align:'center',
+      wordWrap:{width:wrapWidth}
+    }).setOrigin(0.5,0);
+
+    this.add.text(w/2,titleY + (isMobile ? 52 : 66),ending.subtitle,{
+      fontSize:isMobile ? '16px' : '20px',
+      color:'#9fd4ff',
+      align:'center',
+      wordWrap:{width:wrapWidth}
+    }).setOrigin(0.5,0);
+
+    this.add.text(w/2,titleY + (isMobile ? 100 : 126),ending.text,{
+      fontSize:isMobile ? '15px' : '18px',
+      color:'#d8dde7',
+      align:'left',
+      lineSpacing:isMobile ? 8 : 6,
+      wordWrap:{width:wrapWidth}
+    }).setOrigin(0.5,0);
+
+    const choiceLabel = gameState.choices.length ? gameState.choices[gameState.choices.length - 1].label : '—';
+    this.add.text(w/2,h - (isMobile ? 170 : 190),`Décision : ${choiceLabel}`,{
+      fontSize:isMobile ? '13px' : '15px',
+      color:'#b7c4ce',
+      align:'center',
+      wordWrap:{width:wrapWidth}
+    }).setOrigin(0.5);
+
+    const replay = this.add.text(w/2,h - (isMobile ? 112 : 120),'Rejouer',{
+      fontSize:isMobile ? '16px' : '18px',
+      color:'#fff',
+      backgroundColor:'#263440',
+      padding:{x:18,y:10}
+    }).setOrigin(0.5).setInteractive();
+    replay.on('pointerup',()=>{
+      resetGameState();
+      this.scene.start('Intro');
+    });
+
+    const back = this.add.text(w/2,h - (isMobile ? 58 : 64),'Retour aux archives',{
+      fontSize:isMobile ? '14px' : '16px',
+      color:'#9fd4ff'
+    }).setOrigin(0.5).setInteractive();
+    back.on('pointerup',()=>this.scene.start('ArchiveRoom'));
+  }
+}
 
   const config={
     type:Phaser.AUTO,
@@ -469,7 +640,7 @@ class Puzzle extends Phaser.Scene {
     input:{
       activePointers:3
     },
-    scene:[Boot,Intro,ArchiveRoom,Puzzle,MetadataScene]
+    scene:[Boot,Intro,ArchiveRoom,Puzzle,MetadataScene,Ending]
   };
   new Phaser.Game(config);
   
