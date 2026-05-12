@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Les Archives Miroirs - Démo (FR, Qingming seulement)</title>
   <style>
-    html,body { height:100%; margin:0; font-family: Arial, Helvetica, sans-serif; background:#0b0b0e; color:#eee; }
-    #game-container { width:100%; height:100vh; }
+    html,body { width:100%; height:100%; margin:0; overflow:hidden; overscroll-behavior:none; font-family: Arial, Helvetica, sans-serif; background:#0b0b0e; color:#eee; }
+    #game-container { width:100vw; height:100dvh; }
+    #game-container canvas { display:block; touch-action:none; }
     .choice-btn { background: #222; border:1px solid #666; color:#fff; padding:6px 10px; margin:6px; cursor:pointer; border-radius:4px; }
     .choice-btn:hover { background:#333; }
   </style>
@@ -96,13 +97,16 @@
       container.on('pointerout',()=> img.clearTint());
 
 
-      this.add.text(300,h-300,'Décryptage : Puzzle 15×1 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
+      const navX = w / 2;
+      const navY = h < 620 ? h - 130 : h - 300;
+      this.add.text(navX,navY,'Décryptage : Puzzle 15×1 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setOrigin(0.5).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
 
-      this.choiceText = this.add.text(w-320,20,'Choix : —',{fontSize:'14px'});
-      this.add.text(600,h-295, "MetadataScene", {
+      this.choiceText = this.add.text(Math.max(20,w-320),50,'Choix : —',{fontSize:'14px'});
+      this.add.text(navX,navY + 52, "MetadataScene", {
     fontSize: "24px",
     color: "#0077ff"
 })
+.setOrigin(0.5)
 .setInteractive()
 .on('pointerdown', () => {
     this.scene.start("MetadataScene");
@@ -141,50 +145,78 @@ class Puzzle extends Phaser.Scene {
     this.add.text(20, 20, 'Puzzle Qingming (15 × 1)', { fontSize: '18px', color: '#ffffff' });
 
     const grid = 15;
-    const displayH = 140;
 
     // 原图尺寸
     const src = this.textures.get('qingming_main').getSourceImage();
     const imgW = src.width;
     const imgH = src.height;
 
-    const sliceW = Math.floor(imgW / grid);
+    const displayH = Math.min(140, Math.max(56, (w * 0.92) * imgH / imgW));
     const scale = displayH / imgH;
-    const scaledW = Math.round(sliceW * scale);
+    const pieces = Array.from({ length: grid }, (_, i) => {
+      const cropX = Math.round((imgW * i) / grid);
+      const nextCropX = Math.round((imgW * (i + 1)) / grid);
+      const sliceW = nextCropX - cropX;
+      return {
+        index: i,
+        cropX,
+        sliceW,
+        scaledW: Math.round(sliceW * scale)
+      };
+    });
 
-    const totalW = scaledW * grid;
-    const startX = w / 2 - totalW / 2 + scaledW / 2;
-    const y = h / 2;
+    const totalW = pieces.reduce((sum, piece) => sum + piece.scaledW, 0);
+    const startX = w / 2 - totalW / 2;
+    const y = h < 620 ? h * 0.34 : h / 2;
 
     // 创建固定槽位
     this.slots = [];
+    let slotCursorX = startX;
     for (let i = 0; i < grid; i++) {
-      const x = startX + i * scaledW;
-      const slotRect = this.add.rectangle(x, y, scaledW, displayH)
+      const pieceInfo = pieces[i];
+      const x = slotCursorX + pieceInfo.scaledW / 2;
+      const slotRect = this.add.rectangle(x, y, pieceInfo.scaledW, displayH)
         .setStrokeStyle(2, 0x333333);
       this.slots.push({ x, y, slotRect, piece: null });
+      slotCursorX += pieceInfo.scaledW;
     }
 
     // 创建碎片池（放置区）
-    const poolY = h - 180; // 放置区在底部
-    const poolXStart = w / 2 - (grid * scaledW) / 2;
+    const poolY = Math.min(h - 90, y + displayH + 110); // 放置区在底部
+    const poolXStart = w / 2 - totalW / 2;
     const order = Phaser.Utils.Array.Shuffle(Array.from({ length: grid }, (_, i) => i));
 
     this.pool = [];
+    let poolCursorX = poolXStart;
     for (let i = 0; i < grid; i++) {
       const index = order[i];
-      const piece = this.add.image(poolXStart + i * scaledW, poolY, 'qingming_main')
+      const pieceInfo = pieces[index];
+      const textureKey = `qingming_piece_${index}`;
+
+      if (!this.textures.exists(textureKey)) {
+        const canvasTexture = this.textures.createCanvas(textureKey, pieceInfo.sliceW, imgH);
+        const ctx = canvasTexture.getContext();
+        ctx.drawImage(
+          src,
+          pieceInfo.cropX, 0, pieceInfo.sliceW, imgH,
+          0, 0, pieceInfo.sliceW, imgH
+        );
+        canvasTexture.refresh();
+      }
+
+      const piece = this.add.image(poolCursorX + pieceInfo.scaledW / 2, poolY, textureKey)
         .setOrigin(0.5)
         .setScale(scale)
-        .setCrop(index * sliceW, 0, sliceW, imgH)
         .setInteractive();
 
       piece.correctIndex = index;
+      piece.snapDistance = Math.max(45, pieceInfo.scaledW * 0.65);
       piece.startX = piece.x;
       piece.startY = piece.y;
 
       this.input.setDraggable(piece);
       this.pool.push(piece);
+      poolCursorX += pieceInfo.scaledW;
     }
 
     // 拖拽逻辑
@@ -197,8 +229,8 @@ class Puzzle extends Phaser.Scene {
       // 找最近的空槽位
       let closest = null;
       let minDist = Infinity;
-      this.slots.forEach(slot => {
-        if (slot.piece) return; // 槽位已占用
+      this.slots.forEach((slot, slotIndex) => {
+        if (slot.piece && slotIndex !== piece.currentSlot) return; // 槽位已占用
         const d = Phaser.Math.Distance.Between(piece.x, piece.y, slot.x, slot.y);
         if (d < minDist) {
           minDist = d;
@@ -206,15 +238,14 @@ class Puzzle extends Phaser.Scene {
         }
       });
 
-      if (closest && minDist < 50) { // 距离阈值内才放入
-        piece.x = closest.x;
-        piece.y = closest.y;
-
+      if (closest && minDist < piece.snapDistance) { // 距离阈值内才放入
         // 如果之前碎片在槽位里，需要先清除
         if (piece.currentSlot !== undefined) {
           this.slots[piece.currentSlot].piece = null;
         }
 
+        piece.x = closest.x;
+        piece.y = closest.y;
         closest.piece = piece;
         piece.currentSlot = this.slots.indexOf(closest);
       } else {
@@ -233,13 +264,13 @@ class Puzzle extends Phaser.Scene {
 
     // 提示文字
     this.status = this.add.text(
-      w / 2, y + displayH -60,
+      w / 2, y + displayH / 2 + 34,
       'Glissez les fragments pour restaurer le rouleau…',
-      { fontSize: '16px', color: '#ffffff' }
+      { fontSize: w < 520 ? '13px' : '16px', color: '#ffffff', wordWrap:{width:w*0.9} }
     ).setOrigin(0.5);
 
     // 关闭按钮
-    this.add.text(w - 120, 20, 'FERMER', {
+    this.add.text(w - 80, 20, 'FERMER', {
       fontSize: '14px',
       backgroundColor: '#222',
       padding: 6,
@@ -308,14 +339,18 @@ class Puzzle extends Phaser.Scene {
         this.selected = 0;
         this.totalWrong = lines.filter(l => l.wrong).length;
 
-        const startY = 120;
-        const gap = 50;
+        const startY = this.scale.height < 620 ? 76 : 120;
+        const fontSize = this.scale.width < 520 ? '14px' : '20px';
+        const wrapWidth = Math.max(260, this.scale.width - 90);
+        let cursorY = startY;
 
         lines.forEach((line, i) => {
-            let textObj = this.add.text(60, startY + i * gap, line.text, {
-                fontSize: '20px',
-                color: '#000'
+            let textObj = this.add.text(60, cursorY, line.text, {
+                fontSize,
+                color: '#000',
+                wordWrap: { width: wrapWidth }
             }).setInteractive();
+            cursorY += textObj.height + (this.scale.width < 520 ? 12 : 18);
 
             // 点击事件
             textObj.on('pointerdown', () => {
@@ -354,7 +389,8 @@ class Puzzle extends Phaser.Scene {
         const bg = this.add.rectangle(w / 2, h / 2, w, h, 0x000000, 0.5);
         
         // 对话框背景
-        const dialogBox = this.add.rectangle(w / 2, h / 2, 600, 200, 0xffffff);
+        const dialogW = Math.min(600, w * 0.88);
+        const dialogBox = this.add.rectangle(w / 2, h / 2, dialogW, 200, 0xffffff);
         
         // 对话框标题
         const title = this.add.text(w / 2, h / 2 - 60, "Succès !", {
@@ -390,7 +426,21 @@ class Puzzle extends Phaser.Scene {
 
 // `Ending` scene 已移除 —— 如需恢复可从版本控制回退本段代码。
 
-  const config={ type:Phaser.AUTO, parent:'game-container', width:1100, height:760, scene:[Boot,Intro,ArchiveRoom,Puzzle,MetadataScene] };
+  const config={
+    type:Phaser.AUTO,
+    parent:'game-container',
+    backgroundColor:'#0b0b0e',
+    scale:{
+      mode:Phaser.Scale.RESIZE,
+      autoCenter:Phaser.Scale.CENTER_BOTH,
+      width:'100%',
+      height:'100%'
+    },
+    input:{
+      activePointers:3
+    },
+    scene:[Boot,Intro,ArchiveRoom,Puzzle,MetadataScene]
+  };
   new Phaser.Game(config);
   
   </script>
