@@ -35,6 +35,7 @@
   };
 
   const gameState = { choices: [], final: null };
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   class Boot extends Phaser.Scene{ constructor(){ super('Boot'); }preload(){
     // 加载清明上河图主图（用于缩略图）
@@ -48,11 +49,26 @@
     create(){
       const w=this.scale.width, h=this.scale.height;
       this.cameras.main.setBackgroundColor('#071018');
-      this.add.text(w/2, h/3, 'Les Archives Miroirs', {fontSize:'36px', color:'#fff'}).setOrigin(0.5);
+      const isMobile = w < 620;
+      const titleSize = `${Math.round(isMobile ? clamp(w * 0.072, 22, 30) : 36)}px`;
+      const bodySize = `${Math.round(isMobile ? clamp(w * 0.041, 14, 17) : 20)}px`;
+      this.add.text(w/2, isMobile ? h * 0.12 : h/3, 'Les Archives Miroirs', {
+        fontSize:titleSize,
+        color:'#fff',
+        align:'center',
+        wordWrap:{width:w*0.9}
+      }).setOrigin(0.5,0);
       const lines=DIALOGUES.intro;
       let idx=0;
-      const txt=this.add.text(w/2,h/2,lines[0],{fontSize:'20px',color:'#ddd',wordWrap:{width:w*0.8}}).setOrigin(0.5);
-      const next=this.add.text(w/2,h*0.75,'Continuer →',{fontSize:'18px',backgroundColor:'#222',padding:8}).setOrigin(0.5).setInteractive();
+      const txt=this.add.text(w/2,isMobile ? h * 0.24 : h/2,lines[0],{
+        fontSize:bodySize,
+        color:'#ddd',
+        align:'left',
+        lineSpacing:isMobile ? 6 : 2,
+        wordWrap:{width:isMobile ? w*0.82 : w*0.8}
+      }).setOrigin(0.5,isMobile ? 0 : 0.5);
+      const buttonY = isMobile ? Math.min(h - 58, txt.y + txt.height + 34) : h * 0.75;
+      const next=this.add.text(w/2,buttonY,'Continuer →',{fontSize:isMobile ? '16px' : '18px',backgroundColor:'#222',padding:{x:12,y:8}}).setOrigin(0.5).setInteractive();
       next.on('pointerup',()=>{
         idx++;
         if(idx<lines.length) txt.setText(lines[idx]);
@@ -65,45 +81,49 @@
     constructor(){ super('ArchiveRoom'); }
     create(){
       const w=this.scale.width, h=this.scale.height;
+      const isMobile = w < 620;
       this.cameras.main.setBackgroundColor('#07121a');
-      this.add.text(20,20,'Salle des archives : Fragment Qingming', {fontSize:'18px'});
+      const header = this.add.text(18,18,'Salle des archives : Fragment Qingming', {
+        fontSize:isMobile ? '15px' : '18px',
+        color:'#ffffff',
+        wordWrap:{width:w-36}
+      });
 
       const item = DIALOGUES.qingming;
-      const container = this.add.container(w/2, h/2 - 40);
+      const thumbSource = this.textures.get('qingming_thumb').getSourceImage();
+      const thumbScale = Math.min((w * 0.92) / thumbSource.width, (h * (isMobile ? 0.22 : 0.34)) / thumbSource.height);
+      const thumbW = thumbSource.width * thumbScale;
+      const thumbH = thumbSource.height * thumbScale;
+      const containerY = isMobile ? Math.max(160, header.y + header.height + 82) : h/2 - 40;
+      const container = this.add.container(w/2, containerY);
       // 替换为缩略图显示
-      const img = this.add.image(0, -10, 'qingming_thumb').setOrigin(0.5,0.5);
-      img.setScale(0.32); // 根据缩略图大小调整
+      const img = this.add.image(0, 0, 'qingming_thumb').setOrigin(0.5,0.5);
+      img.setScale(thumbScale);
       container.add(img);
 
-      const label = this.add.text(0,100,item.title,{fontSize:'16px'}).setOrigin(0.5);
+      const label = this.add.text(0,thumbH / 2 + 16,item.title,{
+        fontSize:isMobile ? '13px' : '16px',
+        align:'center',
+        wordWrap:{width:Math.min(w*0.86, 520)}
+      }).setOrigin(0.5,0);
       container.add(label);
 
-      // 调整 container 交互区域，保持原有交互逻辑
-      container.setSize(img.displayWidth, img.displayHeight + 40);
-      container.setInteractive(
-               Phaser.Geom.Rectangle.Contains
-      );
-
-      // Background rectangle inside container
-      const rect = this.add.rectangle(0, 0, 100, 10, 0xFFFFFF).setOrigin(0.5);
-      container.add(rect);
-
-      container.setSize(320,200);
-      container.setInteractive(new Phaser.Geom.Rectangle(-160,-100,320,200), Phaser.Geom.Rectangle.Contains);
+      const hitW = Math.max(thumbW, label.width);
+      const hitH = thumbH + label.height + 24;
+      container.setSize(hitW, hitH);
+      container.setInteractive(new Phaser.Geom.Rectangle(-hitW/2,-thumbH/2,hitW,hitH), Phaser.Geom.Rectangle.Contains);
       container.on('pointerup',()=> this.openArchive(item));
-      container.on('pointerover',()=> rect.setFillStyle(0x3f7b8d));
-      container.on('pointerout',()=> rect.setFillStyle(0x325b6e));
       container.on('pointerover',()=> img.setTint(0xaaaaaa));
       container.on('pointerout',()=> img.clearTint());
 
 
       const navX = w / 2;
-      const navY = h < 620 ? h - 130 : h - 300;
-      this.add.text(navX,navY,'Décryptage : Puzzle 15×1 →',{fontSize:'16px',backgroundColor:'#222',padding:8}).setOrigin(0.5).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
+      const navY = isMobile ? Math.min(h - 122, containerY + thumbH / 2 + label.height + 70) : h - 300;
+      this.add.text(navX,navY,'Décryptage : Puzzle 15×1 →',{fontSize:isMobile ? '14px' : '16px',backgroundColor:'#222',padding:{x:10,y:8}}).setOrigin(0.5).setInteractive().on('pointerup',()=>this.scene.launch('Puzzle'));
 
-      this.choiceText = this.add.text(Math.max(20,w-320),50,'Choix : —',{fontSize:'14px'});
+      this.choiceText = this.add.text(18,header.y + header.height + 16,'Choix : —',{fontSize:isMobile ? '13px' : '14px'});
       this.add.text(navX,navY + 52, "MetadataScene", {
-    fontSize: "24px",
+    fontSize: isMobile ? "20px" : "24px",
     color: "#0077ff"
 })
 .setOrigin(0.5)
@@ -116,12 +136,22 @@
 
     openArchive(item){
       const w=this.scale.width, h=this.scale.height;
-      const bg=this.add.rectangle(w/2,h/2, w*0.8, h*0.6, 0x000000,0.92);
+      const isMobile = w < 620;
+      const panelW = isMobile ? w * 0.9 : w * 0.8;
+      const panelH = isMobile ? Math.min(h * 0.58, 360) : h * 0.6;
+      const bg=this.add.rectangle(w/2,h/2, panelW, panelH, 0x000000,0.92);
       const box=this.add.container(0,0,[bg]);
-      const title=this.add.text(w/2,h/2-170,item.title,{fontSize:'22px'}).setOrigin(0.5);
-      const text=this.add.text(w/2-(w*0.8)/2+24,h/2-120,item.text,{fontSize:'16px',wordWrap:{width:w*0.8-48}});
+      const title=this.add.text(w/2,h/2-panelH/2+28,item.title,{
+        fontSize:isMobile ? '16px' : '22px',
+        align:'center',
+        wordWrap:{width:panelW-36}
+      }).setOrigin(0.5,0);
+      const text=this.add.text(w/2-panelW/2+24,h/2-panelH/2+88,item.text,{
+        fontSize:isMobile ? '14px' : '16px',
+        wordWrap:{width:panelW-48}
+      });
       // 三个操作按钮已移除，改为单一关闭按钮以避免影响其他场景逻辑
-      const closeBtn = this.add.text(w/2, h/2+160, 'FERMER', { fontSize: '16px', backgroundColor: '#555', padding: 8 }).setInteractive().setOrigin(0.5);
+      const closeBtn = this.add.text(w/2, h/2+panelH/2-38, 'FERMER', { fontSize: '16px', backgroundColor: '#555', padding: {x:12,y:8} }).setInteractive().setOrigin(0.5);
       box.add([title, text, closeBtn]);
       const close = () => { box.destroy(true); };
       closeBtn.on('pointerup', close);
